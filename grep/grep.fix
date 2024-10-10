@@ -1,0 +1,60 @@
+// Grep
+module Main;
+
+import Minilib.App.Clap;
+import Minilib.Text.RegExp;
+import Minilib.Text.StringEx;
+
+process_file: RegExp -> IOHandle -> Option String -> IOFail ();
+process_file = |regexp, input_fh, filename| (
+    let prefix = if filename.is_some { filename.as_some + ":" } else { "" };
+    loop_m((), |_|
+        let line = *read_line(input_fh);
+        if line == "" {
+            break_m $ ()
+        };
+        let line = line.strip_spaces;
+        let res = regexp.match(line);
+        if res.is_err {
+            continue_m $ ()
+        };
+        let _ = *println(prefix + line).lift;
+        continue_m $ ()
+    )
+);
+
+process_files: RegExp -> Array String -> IOFail ();
+process_files = |regexp, input_files| (
+    if input_files.is_empty {
+        process_file(regexp, IO::stdin, none())
+    };
+    input_files.to_iter.fold_m(
+        (), |_, input_file|
+        let input_fh = *open_file(Path::parse(input_file).as_some, "r");
+        let filename = if input_files.get_size >= 2 { some(input_file) } else { none() };
+        let _ = *process_file(regexp, input_fh, filename);
+        let _ = *close_file(input_fh).lift;
+        pure()
+    )
+);
+
+command: Command;
+command = (
+    Command::new("grep")
+    .version("0.1.0")
+    .about("Find lines matching a regular expression.")
+    .arg(Arg::new("PATTERN").help("Regular expression pattern").takes_value.required)
+    .arg(Arg::new("FILES").help("Input files").takes_multiple_values)
+);
+
+main: IO ();
+main = (
+    do {
+        let matches = *command.get_matches;
+        let pattern = matches.get_one("PATTERN").as_some;
+        let input_files = matches.get_many("FILES").map_or(Array::empty(0), |x|x);
+        let regexp = *RegExp::compile(pattern, "").from_result;
+        process_files(regexp, input_files)
+    }
+    .try(|err| eprintln (err))
+);

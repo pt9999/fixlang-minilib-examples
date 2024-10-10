@@ -1,0 +1,62 @@
+module Main;
+
+import HashMap;
+
+import Minilib.App.Clap;
+import Minilib.Encoding.Json;
+import Minilib.Encoding.Json.JsonEncoder;
+import Minilib.Encoding.Json.JsonDecoder;
+import Minilib.Text.SimpleParser;
+
+perf_decode: I64 -> String -> Result ErrMsg Json;
+perf_decode = |count, text| (
+    let (res, consumed_time) = ().consumed_time_while(|_|
+        Iterator::count_up(0).take(count).fold(
+            ok $ null(), |_,_|
+            JsonDecoder::decode(text)
+        )
+    );
+    eval debug_eprintln("Total time: " + consumed_time.to_string);
+    eval debug_eprintln("Time per loop: " + (consumed_time / count.to_F64).to_string);
+    res
+);
+
+command: Command;
+command = (
+    Command::new("json_cat.out")
+    .version("1.0")
+    .about("Reads JSON from a file (or standard input), and writes it to a file (or standar output).")
+    .arg(Arg::new("input").short('i').long("input").help("Input file (default: standard input)").takes_value)
+    .arg(Arg::new("output").short('o').long("output").help("Output file (default: standard output)").takes_value)
+    .arg(Arg::new("plain").short('p').long("plain").help("Disable pretty printing (default: enable pretty printing)").takes_value)
+);
+
+main: IO ();
+main = (
+    do {
+        let matches = *command.get_matches;
+        let input = matches.get_one("input");
+        let output = matches.get_one("output");
+        let plain = matches.get_one("plain");
+        let input_fh = *if input.is_none {
+            pure $ IO::stdin
+        } else {
+            open_file(Path::parse(input.as_some).as_some, "r")
+        };
+        let output_fh = *if output.is_none {
+            pure $ IO::stdout
+        } else {
+            open_file(Path::parse(output.as_some).as_some, "w")
+        };
+        let text = *IO::read_string(input_fh);
+        let json = *JsonDecoder::decode(text).from_result;
+        //let json = *perf_decode(1000, text).from_result;
+        let text2 = if plain.is_some {
+            JsonEncoder::encode(json)
+        } else {
+            JsonEncoder::encode_pretty(json)
+        };
+        let _ = *text2.write_string(output_fh);
+        pure $ ()
+    }.try (eprintln)
+);

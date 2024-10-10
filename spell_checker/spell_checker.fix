@@ -1,0 +1,427 @@
+// This is a sample program for spell checker.
+//
+// Currently, you can only enter a single word, and if the word is not in the word list,
+// correction suggestions will be displayed.
+//
+// Although the spell checker can be used with user-defined word lists,
+// I recommend that you use predefined word list files.
+//
+// For Ubuntu 22.04, American English word list file can be installed by the command below.
+// It is installed to `/usr/share/dict/american-english`.
+// ```
+// $ sudo apt install wamerican
+// ```
+//
+module Main;
+
+import Character;
+import Hash;
+import HashMap;
+import HashSet;
+
+import Minilib.App.Clap;
+import Minilib.Encoding.Binary;
+import Minilib.IO.FileSystem;
+import Minilib.Text.StringEx;
+
+namespace SpellChecker {
+    type SpellChecker = unbox struct {
+        words: HashSet String,
+        symspell: HashMap String (Array String)
+    };
+
+    empty: SpellChecker;
+    empty = (
+        SpellChecker {
+            words: HashSet::empty(100),
+            symspell: HashMap::empty(100)
+        }
+    );
+
+    from_word_list_file: Path -> IOFail SpellChecker;
+    from_word_list_file = |filepath| (
+        let _ = *eprintln("loading word list file...").lift;
+        // IO::read_file_string() sometimes freezes
+        let word_lists = (*_read_file_bytes_ex(filepath))._unsafe_to_string;
+        let _ = *eprintln("registering word list...").lift;
+        let (checker, time) = consumed_time_while_lazy (|_|
+            from_word_list_file_contents(word_lists)
+        );
+        let _ = *eprintln("registering time=" + time.to_string).lift;
+        /*
+        let _ = *eprintln("deleted count=" + checker.@symspell.get_size.to_string).lift;
+        let (count, time) = consumed_time_while_lazy (|_|
+            checker.@symspell.to_iter.fold(0, |n, (k, words)| n + words.get_size)
+        );
+        let _ = *eprintln("word count=" + count.to_string).lift;
+        let _ = *eprintln("word count time=" + time.to_string).lift;
+        */
+        let _ = *eprintln("done.").lift;
+        pure $ checker
+    );
+
+    _read_file_bytes_ex: Path -> IOFail (Array U8);
+    _read_file_bytes_ex = |path| (
+        let file_stat = *stat(path.to_string);
+        let file_size = file_stat.st_size;
+        let fh = *open_file(path, "r");
+        let bytes = *read_n_bytes(fh, file_size);
+        let _ = *close_file(fh).lift;
+        pure $ bytes
+    );
+
+    from_word_list_file_contents: String -> SpellChecker;
+    from_word_list_file_contents = |word_lists| (
+        let checker = SpellChecker::empty;
+        let words = word_lists.split_by(Character::is_space);
+        words.zip(Iterator::count_up(0)).loop_iter(
+            checker, |checker, (word, i)|
+            //if i >= 10000 { break $ checker };
+            eval if i % 1000 == 0 { debug_eprintln(i.to_string) } else { () };
+            continue $ checker.add_word(word)
+        )
+    );
+
+    _upsert: [k: HashKey] k -> v -> (v -> v) -> HashMap k v -> HashMap k v;
+    _upsert = |k, v, f, map| (
+        let opt = map.find(k);
+        if opt.is_none {
+            map.insert(k, v)
+        };
+        let v = f(opt.as_some);
+        map.insert(k, v)
+    );
+
+    add_word: String -> SpellChecker -> SpellChecker;
+    add_word = |word, checker| (
+        let checker = checker.mod_words(insert(word));
+        let k = _max_delete_char_count(word);
+        _delete_chars(k, word).to_iter.fold(
+            checker, |checker, deleted|
+            checker.mod_symspell(_upsert(deleted, [word], push_back(word)))
+        )
+    );
+
+    find_word: String -> SpellChecker -> Iterator String;
+    find_word = |typemiss_word, checker| (
+        if checker.@words.contains(typemiss_word) {
+            Iterator::empty
+        };
+        let k = _max_delete_char_count(typemiss_word);
+        let candidates: Iterator String = (
+            _delete_chars(k, typemiss_word).to_iter.map(
+                |typemiss_deleted|
+                checker.@symspell.find(typemiss_deleted)
+                .map_or(Iterator::empty, to_iter)
+            )
+            .flatten
+        );
+        //let candidates = candidates.push_front(typemiss_word);
+        let candidates = HashSet::from_iter(candidates).to_iter;    // uniq
+        let candidates = candidates.map(|word|
+            (levenshtein(word, typemiss_word), word)
+        );
+        // sort by levenshtein
+        let candidates = candidates.to_array.sort_by(|((i1, w1), (i2,w2))|
+            i1 < i2 ||
+            (i1 == i2 && w1 < w2)
+        ).to_iter;
+        // filter by levenshtein
+        let max_levenshtein = 2;
+        let min_levenshtein = candidates.fold(
+            max_levenshtein, |min_levenshtein, (i, w)|
+            min(min_levenshtein, i)
+        );
+        let candidates = candidates.filter(|(i, w)| i == min_levenshtein);
+        candidates.map(|(i,w)| w)
+    );
+
+    _max_delete_char_count: String -> I64;
+    _max_delete_char_count = |word| (
+        let n = word.get_size;
+        if n < 3      { 0 }
+        else if n < 5 { 1 }
+        else          { 2 }
+    );
+
+    // delete at most `k` characters from a string
+    _delete_chars: I64 -> String -> Array String;
+    _delete_chars = |k, str| (
+        let n = str.get_size;
+        let buf = Array::empty(n + 1);
+        let output = Array::empty(100);
+        _delete_chars_inner(0, k, str, buf, output)
+    );
+
+    _delete_chars_inner: I64 -> I64 -> String -> Array U8 -> Array String -> Array String;
+    _delete_chars_inner = |start, k, str, buf, output| (
+        if start >= str.get_size {
+            output.push_back(buf._unsafe_to_string)
+        };
+
+        let output = if k > 0 {
+            _delete_chars_inner(start + 1, k - 1, str, buf, output)
+        } else { output };
+        let buf = buf.push_back(str.get_bytes.@(start));
+        _delete_chars_inner(start + 1, k, str, buf, output)
+    );
+
+    levenshtein: String -> String -> I64;
+    levenshtein = |str1, str2| (
+        let n1 = str1.get_size;
+        let n2 = str2.get_size;
+        let bytes1 = str1.get_bytes;
+        let bytes2 = str2.get_bytes;
+        let arr = Array::fill((n1 + 1) * (n2 + 1), I64::maximum);
+        let arr = arr.set(0, 0);
+        let arr = loop(
+            (arr, 0), |(arr, i1)|
+            if i1 > n1 {
+                break $ arr
+            };
+            let arr = loop(
+                (arr, 0), |(arr, i2)|
+                if i2 > n2 {
+                    break $ arr
+                };
+                let i = i1 * (n2 + 1) + i2;
+                let c = arr.@(i);
+                let arr = if i2 < n2 {
+                    arr.mod(i + 1, |d| min(d, c + 1))
+                } else { arr };
+                let arr = if i1 < n1 {
+                    arr.mod(i + (n2 + 1), |d| min(d, c + 1))
+                } else { arr };
+                let arr = if i1 < n1 && i2 < n2{
+                    let change = if bytes1.@(i1) == bytes2.@(i2) { 0 } else { 1 };
+                    arr.mod(i + (n2 + 1) + 1, |d| min(d, c + change))
+                } else { arr };
+                continue $ (arr, i2 + 1)
+            );
+            continue $ (arr, i1 + 1)
+        );
+        let _ = loop(
+            (arr, 0), |(arr, i1)|
+            if i1 > n1 {
+                break $ arr
+            };
+            continue $ (arr, i1 + 1)
+        );
+        arr.@((n1 + 1) * (n2 + 1) - 1)
+    );
+
+}
+
+namespace DictCache {
+    save_dict_cache: Path -> SpellChecker -> IOFail ();
+    save_dict_cache = |path, checker| (
+        let _ = *println("saving " + path.to_string).lift;
+        let buf = ByteBuffer::empty(1024*1024, ByteOrder::little_endian());
+        let buf = buf.write_words(checker.@words.to_iter);
+        let buf = buf.write_symspell(checker.@symspell);
+        write_file_bytes(path, buf.@array)
+    );
+
+    load_dict_cache: Path -> IOFail SpellChecker;
+    load_dict_cache = |path| (
+        let _ = *println("loading " + path.to_string).lift;
+        let array = *_read_file_bytes_ex(path);
+        let buf = ByteBuffer::make(array, ByteOrder::little_endian());
+        let pos = 0;
+        let (words, pos) = buf.read_words(pos);
+        let (symspell, pos) = buf.read_symspell(pos);
+        let checker = SpellChecker::empty;
+        let checker = checker.set_words(HashSet::from_iter(words.to_iter));
+        let checker = checker.set_symspell(symspell);
+        let _ = *println("loading done").lift;
+        pure $ checker
+    );
+
+    push_back_zeros: I64 -> ByteBuffer -> ByteBuffer;
+    push_back_zeros = |size, buf| (
+        buf.mod_array(|arr|
+            loop(
+                (arr, 0), |(arr, i)|
+                if i >= size { break $ arr };
+                continue $ (arr.push_back(0_U8), i + 1)
+            )
+        )
+    );
+
+    write_U64: U64 -> ByteBuffer -> ByteBuffer;
+    write_U64 = |u64, buf| (
+        let i = buf.get_size;
+        buf.push_back_zeros(8).set_u64(i, u64)
+    );
+
+    write_string: String -> ByteBuffer -> ByteBuffer;
+    write_string = |str, buf| (
+        let n = str.get_size;
+        let bytes = str.get_bytes;
+        eval assert (|_| "invalid bytes", bytes.@(n) == '\0');
+        let i = buf.get_size;
+        buf.mod_array(|arr|
+            loop(
+                (arr, 0), |(arr, i)|
+                if i >= n + 1 { break $ arr };
+                continue $ (arr.push_back(bytes.@(i)), i + 1)
+            )
+        )
+    );
+
+    write_words: Iterator String -> ByteBuffer -> ByteBuffer;
+    write_words = |iter, buf| (
+        let size = iter.fold(0, |size, _| size + 1);
+        let buf = buf.write_U64(size.to_U64);
+        let buf = iter.fold(buf, |buf, word|
+            buf.write_string(word)
+        );
+        buf
+    );
+
+    write_symspell: HashMap String (Array String) -> ByteBuffer -> ByteBuffer;
+    write_symspell = |map, buf| (
+        let iter = map.to_iter;
+        let size = iter.fold(0, |size, _| size + 1);
+        let buf = buf.write_U64(size.to_U64);
+        let buf = iter.fold(buf, |buf, (deleted, words)|
+            let buf = buf.write_string(deleted);
+            buf.write_words(words.to_iter)
+        );
+        buf
+    );
+
+    read_U64: I64 -> ByteBuffer -> (U64, I64);
+    read_U64 = |pos, buf| (
+        (buf.get_u64(pos), pos + 8)
+    );
+
+    read_string: I64 -> ByteBuffer -> (String, I64);
+    read_string = |pos, buf| (
+        let array = buf.@array;
+        let output = Array::empty(25);
+        loop(
+            (output, pos), |(output, pos)|
+            let c = array.@(pos);
+            let output = output.push_back(c);
+            if c == 0_U8 {
+                let str = output._unsafe_to_string;
+                break $ (str, pos + 1)
+            };
+            continue $ (output, pos + 1)
+        )
+    );
+
+    read_words: I64 -> ByteBuffer -> (Array String, I64);
+    read_words = |pos, buf| (
+        let (size, pos) = buf.read_U64(pos);
+        let size = size.to_I64;
+
+        let words = Array::empty(size);
+        loop(
+            (words, pos), |(words, pos)|
+            if words.get_size >= size { break $ (words, pos) };
+            let (word, pos) = buf.read_string(pos);
+            let words = words.push_back(word);
+            continue $ (words, pos)
+        )
+    );
+
+    read_symspell: I64 -> ByteBuffer -> (HashMap String (Array String), I64);
+    read_symspell = |pos, buf| (
+        let (size, pos) = buf.read_U64(pos);
+        let size = size.to_I64;
+        let map = HashMap::empty(size);
+        loop(
+            (map, pos), |(map, pos)|
+            if map.get_size >= size { break $ (map, pos) };
+            let (key, pos) = buf.read_string(pos);
+            let (words, pos) = buf.read_words(pos);
+            let map = map.insert(key, words);
+            continue $ (map, pos)
+        )
+    );
+}
+
+test_levenshtein: IO ();
+test_levenshtein = (
+    do {
+        loop_m(
+            (), |_|
+            let _ = *eprintln("input word1,word2").lift;
+            let line = *read_line(IO::stdin);
+            if line == "" { break_m $ () };
+            let line = line.strip_spaces;
+            let (word1, word2) = line.split_first(",");
+            let c = levenshtein(word1, word2);
+            let _ = *eprintln("word1="+word1+" word2="+word2+" levenshtein="+c.to_string).lift;
+            continue_m $ ()
+        )
+    }
+    .try(eprintln)
+);
+
+test_delete_chars: IO ();
+test_delete_chars = (
+    do {
+        loop_m(
+            (), |_|
+            let _ = *eprintln("input word").lift;
+            let line = *read_line(IO::stdin);
+            if line == "" { break_m $ () };
+            let word = line.strip_spaces;
+            let words = _delete_chars(2, word);
+            let _ = *words.to_iter.fold_m(
+                (), |_, w|
+                eprintln(w).lift
+            );
+            continue_m $ ()
+        )
+    }
+    .try(eprintln)
+);
+
+command: Command;
+command = (
+    Command::new("spell_checker.out")
+    .version("1.0")
+    .about("Sample spell checker")
+    .arg(Arg::new("word-list").short('w').long("word-list").help("Word list file").takes_value.default_value("/usr/share/dict/american-english"))
+    .arg(Arg::new("dict-cache").short('c').long("dict-cache").help("Dict cache file").takes_value.default_value(".fixlang/spell_checker_dict_cache.dat"))
+);
+
+main: IO ();
+main = (
+    do {
+        let matches = *command.get_matches;
+        let word_list_file = matches.get_one("word-list").as_some;
+        let dict_cache_file = matches.get_one("dict-cache").as_some;
+
+        let checker = *if *dict_cache_file.file_exists.lift {
+            load_dict_cache(Path::parse(dict_cache_file).as_some)
+        } else {
+            let checker = *SpellChecker::from_word_list_file(
+                Path::parse(word_list_file).as_some
+            );
+            let _ = *checker.save_dict_cache(Path::parse(dict_cache_file).as_some);
+            pure $ checker
+        };
+
+        loop_m(
+            (), |_|
+            let _ = *print("Input word> ").lift;
+            let _ = *fflush(IO::stdout);
+            let line = *read_line(IO::stdin);
+            if line == "" { break_m $ () };
+            let typemiss_word = line.strip_spaces;
+            let words = checker.find_word(typemiss_word);
+            let _ = *println("Candidates are:").lift;
+            let _ = *words.fold_m(
+                (), |_, word|
+                println("  " + word).lift
+            );
+            continue_m $ ()
+        )
+    }
+    .try(eprintln)
+);

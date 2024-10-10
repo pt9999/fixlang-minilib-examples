@@ -1,0 +1,73 @@
+// This program generates probable primes of 128 bit to 1024 bit.
+module Main;
+
+import Random;
+
+import Minilib.App.Clap;
+import Minilib.Math.BigInt;
+import Minilib.Math.BigIntPrime;
+import Minilib.Text.StringEx;
+import Minilib.Common.TimeEx;
+
+generate_probable_prime: I64 -> PrimeGen -> IO ();
+generate_probable_prime = |bit_length, prime_gen| (
+    let _ = *println("Searching a probable prime of " + bit_length.to_string + " bits...");
+    let (n, time) = *consumed_realtime_while_io(
+        prime_gen.probable_prime(bit_length)
+    );
+    let _ = *println(n.to_string);
+    let _ = *println("time="+time.to_string);
+    pure()
+);
+
+type Param = unbox struct {
+    begin_bits: I64,
+    step_bits: I64,
+    end_bits: I64,
+    seed: I64
+};
+
+generate_probable_primes: Param -> IO ();
+generate_probable_primes = |p| (
+    let _ = *println((p.@begin_bits, p.@end_bits).format("This program generates probable primes of {} bit to {} bit."));
+    let _ = *println("It may take several minutes. Please be patient.");
+    let _ = *println("");
+    let random = Random::init_by_seed(p.@seed.to_U64);
+    let prime_gen = *PrimeGen::make(random, false);
+    loop_m(
+        p.@begin_bits, |bit_length|
+        if bit_length > p.@end_bits { break_m $ () };
+        let _ = *generate_probable_prime(bit_length, prime_gen);
+        continue_m $ bit_length + p.@step_bits
+    )
+);
+
+command: Command;
+command = (
+    Command::new("probable_primes.out")
+    .version("0.1.0")
+    .about("Generates probable primes")
+    .arg(Arg::new("from").short('f').long("from").help("Minimum number of bits").takes_value.default_value("128"))
+    .arg(Arg::new("to").short('t').long("to").help("Maximum number of bits").takes_value.default_value("1024"))
+    .arg(Arg::new("step").short('s').long("step").help("Step of bits").takes_value.default_value("128"))
+    .arg(Arg::new("seed").long("seed").help("Seed of the random number generator (default: current time)").takes_value)
+);
+
+main: IO ();
+main = (
+    do {
+        let _ = *pure();
+        let _ = FFI_CALL[() setbuf(Ptr, Ptr), IO::stdout._file_ptr, nullptr];
+        let time = FFI_CALL[I32 time(Ptr), nullptr];
+
+        let matches = *command.get_matches;
+        let param = Param {
+            begin_bits: *matches.get_one("from").as_some.from_string.from_result,
+            step_bits: *matches.get_one("step").as_some.from_string.from_result,
+            end_bits: *matches.get_one("to").as_some.from_string.from_result,
+            seed: *matches.get_one("seed").as_some_or(time.to_string).from_string.from_result
+        };
+        generate_probable_primes(param).lift
+    }
+    .try(eprintln)
+);

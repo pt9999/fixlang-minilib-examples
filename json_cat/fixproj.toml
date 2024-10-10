@@ -1,0 +1,25 @@
+[general]
+name = "json-cat"
+version = "0.1.0"
+
+[build]
+output = "json_cat.out"
+opt_level = "separated"
+files = [
+    "json_cat.fix",
+]
+
+[[dependencies]]
+name = "minilib-common"
+version = "*"
+path = "../../fixlang-minilib-common"
+
+[[dependencies]]
+name = "minilib-app"
+version = "*"
+path = "../../fixlang-minilib-app"
+
+[[dependencies]]
+name = "minilib-json"
+version = "*"
+path = "../../fixlang-minilib-json"

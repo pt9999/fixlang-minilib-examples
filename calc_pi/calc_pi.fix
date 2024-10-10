@@ -1,0 +1,111 @@
+/*
+Calculate pi
+
+Calculation time is about O(n^2).
+
+ 1000 digits     0.119second    x 1.00
+ 2000 digits     0.548sec       x 4.61
+ 3000 digits     1.387sec      x 11.66
+ 5000 digits     4.093sec      x 34.39
+10000 digits    19.774sec     x 166.29
+
+*/
+module Main;
+
+import Math;
+
+import Minilib.App.Clap;
+import Minilib.Math.BigFloat;
+import Minilib.Math.BigInt;
+import Minilib.Text.StringEx;
+
+
+// Gauss–Legendre algorithm
+gauss_legendre_f64: F64 -> F64 -> F64 -> F64 -> I64 -> F64;
+gauss_legendre_f64 = |a, b, t, p, i| (
+    if i < 0 {
+        (a + b) * (a + b) / (4.0 * t)
+    };
+    let a1 = (a + b) / 2.0;
+    let b1 = (a * b).sqrt;
+    let da = a - a1;
+    let t1 = t - p * da * da;
+    let p1 = 2.0 * p;
+    gauss_legendre_f64(a1, b1, t1, p1, i - 1)
+);
+
+// Gauss–Legendre algorithm
+gauss_legendre_bf: BigFloat -> BigFloat -> BigFloat -> BigFloat -> I64 -> BigFloat;
+gauss_legendre_bf = |a, b, t, p, i| (
+    if i < 0 {
+        let a_plus_b = a + b;
+        a_plus_b * a_plus_b / t.mul_pow2(2)
+    };
+    let a1 = (a + b).mul_pow2(-1);
+    let b1 = (a * b).sqrt;
+    let da = a - a1;
+    let t1 = t - p * da * da;
+    let p1 = p.mul_pow2(1);
+    let i = if da.is_zero && b == b1 && t == t1 { 0 }
+    else { i };
+    gauss_legendre_bf(a1, b1, t1, p1, i - 1)
+);
+
+calc_pi_f64: () -> F64;
+calc_pi_f64 = |_| (
+    let a = 1.0;
+    let b = (1.0 / 2.0).sqrt;
+    let t = 1.0 / 4.0;
+    let p = 1.0;
+    let max_loop = 30;
+    gauss_legendre_f64(a, b, t, p, max_loop)
+);
+
+calc_pi_bf: I64 -> BigFloat;
+calc_pi_bf = |prec10| (
+    let prec = Math::ceil(prec10.to_F64 / Math::log10(2.0)).to_I64;
+    let a = BigFloat::from_F64(1.0).set_prec(prec);
+    let b = BigFloat::from_F64(1.0 / 2.0).set_prec(prec).sqrt;
+    let t = BigFloat::from_F64(1.0 / 4.0).set_prec(prec);
+    let p = BigFloat::from_F64(1.0).set_prec(prec);
+    let max_loop = prec;
+    gauss_legendre_bf(a, b, t, p, max_loop)
+);
+
+main_f64: IO ();
+main_f64 = (
+    let pi = calc_pi_f64();
+    println(pi.to_string_precision(16_U8))
+);
+
+main_bf: I64 -> IO ();
+main_bf = |prec10| (
+    let pi = calc_pi_bf(prec10);
+    let _ = *println(pi.to_string_precision(prec10));
+    pure()
+);
+
+command: Command;
+command = (
+    Command::new("calc_pi")
+    .version("0.1.0")
+    .about("Calculates pi")
+    .arg(Arg::new("prec").short('p').long("prec").help("precision of base 10").takes_value.default_value("1000"))
+    .arg(Arg::new("f64").short('f').long("f64").help("calculate with F64"))
+);
+
+main: IO ();
+main = (
+    do {
+        let matches = *command.get_matches;
+        let prec10 = *matches.get_one("prec").as_some.from_string.from_result;
+        let f64 = matches.get_one("f64");
+        let _ = *if f64.is_some{
+            main_f64
+        } else {
+            main_bf(prec10)
+        }.lift;
+        pure()
+    }
+    .try(eprintln)
+);

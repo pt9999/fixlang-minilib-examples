@@ -1,0 +1,200 @@
+// An HTTP server that renders Mandelbrot fractal images.
+module Main;
+
+import AsyncTask;
+
+import Minilib.App.Clap;
+import Minilib.IO.Path;
+import Minilib.Media.Image;
+import Minilib.Media.Png;
+import Minilib.Monad.FunctorM;
+import Minilib.Math.Complex;
+import Minilib.Net.HttpServer;
+import Minilib.Net.Request;
+import Minilib.Thread.Future;
+import Minilib.Thread.TaskPool;
+import Minilib.Text.StringEx;
+
+type Real = F64;
+
+threshold_distance: Real;
+threshold_distance = 4.0;
+
+mandelbrot: Real -> Real -> I64 -> I64;
+mandelbrot = |re, im, loop_max| (
+    let c = complex(re, im);
+    let z = complex(zero, zero);
+    loop(
+        (z, 0), |(z, i)|
+        let z = z * z + c;
+        let a = z.abs2;
+        if a > threshold_distance {
+            break $ i
+        };
+        if i >= loop_max {
+            break $ -1
+        };
+        continue $ (z, i + 1)
+    )
+);
+
+palette: I64 -> I64 -> (U8, U8, U8);
+palette = |loop_max, i| (
+    if i == -1 { (0_U8, 0_U8, 0_U8) };
+    let c = i.to_F64 / loop_max.to_F64 * 512.0;
+    let r = max(0.0, min(255.0, c - 256.0)).to_U8;
+    let g = max(0.0, min(255.0, c - 128.0)).to_U8;
+    let b = max(0.0, min(255.0, c)).to_U8;
+    (r, g, b)
+);
+
+parallel_map_m: TaskPool -> (a -> IO b) -> Array a -> IOFail (Array b);
+parallel_map_m = |pool, f, arr| (
+    let futures = *arr.map_m(
+        |a| Future::make(pool, pure(a).bind(f))
+    );
+    futures.map_m(
+        |future| future.get
+    )
+);
+
+type Param = unbox struct {
+    width: I64,
+    height: I64,
+    x0: Real,
+    y0: Real,
+    x1: Real,
+    y1: Real,
+    loop_max: I64
+};
+
+render_png_image: Param -> IOFail (Array U8);
+render_png_image = |param| (
+    let width = param.@width;
+    let height = param.@height;
+    let xrange = (param.@x0, param.@x1);
+    let yrange = (param.@y0, param.@y1);
+    let loop_max = param.@loop_max;
+    let render_scanline: I64 -> IO (Array (U8, U8, U8)) = |y| (
+        let _ = *pure();
+        let im = y.to_F64 / height.to_F64 * (yrange.@1 - yrange.@0) + yrange.@0;
+        pure $ Iterator::range(0, width).to_array.map(|x|
+            let re = x.to_F64 / width.to_F64  * (xrange.@1 - xrange.@0) + xrange.@0;
+            let color = mandelbrot(re, im, loop_max).palette(loop_max);
+            color
+        )
+    );
+
+    let task_pool = *TaskPool::make(number_of_processors).lift;
+    let scanlines = *Iterator::range(0, height).to_array
+                     .parallel_map_m(task_pool, render_scanline);
+    let _ = *task_pool.shutdown.lift;
+
+    let image = Image::make(width, height, "RGB");
+    let image = Iterator::range(0, height).fold(
+        image, |image, y|
+        let scanline = scanlines.@(y);
+        Iterator::range(0, width).fold (
+            image, |image, x|
+            let color = scanline.@(x);
+            let index = image.calc_index(x, y, 0);
+            image.set_rgb(index, color)
+        )
+    );
+    image.write_png_to_memory
+);
+
+
+type AppState = unbox struct {
+    asset_dir: String,
+    html_path: Path
+};
+
+namespace AppState {
+    initialize: IOFail (Var AppState);
+    initialize = (
+        let _ = *pure();    // make it lazy
+        let args = *IO::get_args.lift;
+        let app_dir = if args.get_size > 0 { dirname(args.@(0)) } else { "." };
+        let asset_dir = join_paths([app_dir, "assets/"]);
+        let html_path = Path::parse(asset_dir + "fractal.html").as_some;
+        let state = AppState {
+            asset_dir: asset_dir,
+            html_path: html_path
+        };
+        let state_var = *Var::make(state).lift;
+        pure $ state_var
+    );
+
+    on_get_index: Var AppState -> Request -> Response -> IOFail Response;
+    on_get_index = |app_state_var, req, res| (
+        let app_state = *app_state_var.get.lift;
+        let content = *read_file_bytes(app_state.@html_path);
+        let content = content._unsafe_to_string;
+        res.content_type("html").write_str(content)
+    );
+
+    on_get_image: Var AppState -> Request -> Response -> IOFail Response;
+    on_get_image = |app_state_var, req, res| (
+        let app_state = *app_state_var.get.lift;
+        let param = *do {
+            let get_param = |name| req.find_query(name).map_or(throw $ "param not found: " + name, pure);
+            let get_param_I64 = |name| (
+                let value = *get_param(name);
+                let value: I64 = *from_string(value).from_result;
+                pure $ value
+            );
+            let get_param_F64 = |name| (
+                let value = *get_param(name);
+                let value: F64 = *from_string(value).from_result;
+                pure $ value
+            );
+            pure $ ok $ Param {
+                width: 512,
+                height: 512,
+                x0: *get_param_F64("x0"),
+                y0: *get_param_F64("y0"),
+                x1: *get_param_F64("x1"),
+                y1: *get_param_F64("y1"),
+                loop_max: *get_param_I64("loop_max")
+            }
+        }.to_result.lift;
+        if param.is_err {
+            res.status(400).write_str(param.as_err)
+        };
+        let param = param.as_ok;
+        if param.is_err {
+            res.status(400).write_str(param.as_err)
+        };
+        let param = param.as_ok;
+        let png_data = *render_png_image(param);
+        res.content_type("image/png").write_bytes(png_data)
+    );
+}
+
+command: Command;
+command = (
+    Command::new("fractal_server.out")
+    .version("0.1")
+    .about("An HTTP server that renders Mandelbrot fractal images.")
+    .arg(Arg::new("host").short('h').long("host").help("IP address to liten").takes_value.default_value("127.0.0.1"))
+    .arg(Arg::new("port").short('p').long("port").help("port number to listen").takes_value.default_value("8080"))
+);
+
+main: IO ();
+main = (
+    do {
+        let matches = *command.get_matches;
+        let host = matches.get_one("host").as_some;
+        let port = matches.get_one("port").as_some;
+        let server_host_port = host + ":" + port;
+
+        let app_state_var = *AppState::initialize;
+        let app = App::make();
+        let app = app.on("GET", "/", AppState::on_get_index(app_state_var));
+        let app = app.on("GET", "/image", AppState::on_get_image(app_state_var));
+        let app = *app.listen(server_host_port);
+        pure()
+    }
+    .try(|err| eprintln(err))
+);

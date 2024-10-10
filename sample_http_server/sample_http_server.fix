@@ -1,0 +1,149 @@
+// Sample HTTP server that serves a chat room.
+
+module Main;
+
+import AsyncTask;
+
+import Minilib.App.Clap;
+import Minilib.IO.Path;
+import Minilib.Net.HTML;
+import Minilib.Net.HttpServer;
+import Minilib.Net.Request;
+import Minilib.Text.StringEx;
+
+type Chat = unbox struct {
+    name: String,
+    message: String
+};
+
+namespace Chat {
+    make: String -> String -> Chat;
+    make = |name, message| Chat {
+        name: name,
+        message: message
+    };
+
+    to_element: Chat -> HTMLElement;
+    to_element = |chat| (
+        div_.attr("class", "chat")
+            .add(span.attr("class", "name").text(chat.@name))
+            .add(span.attr("class", "message").text(chat.@message))
+    );
+}
+
+type ChatBoard = unbox struct {
+    template: String,
+    history: Array Chat
+};
+
+namespace ChatBoard {
+    empty: ChatBoard;
+    empty = ChatBoard {
+        template: "",
+        history: Array::empty(100)
+    };
+
+    read_template: Path -> ChatBoard -> IOFail ChatBoard;
+    read_template = |path, chat_board| (
+        let template = *read_file_string(path);
+        pure $ chat_board.set_template(template)
+    );
+
+    add_chat: Chat -> ChatBoard -> ChatBoard;
+    add_chat = |chat, chat_board| (
+        chat_board.mod_history(push_back(chat))
+    );
+
+    render: String -> ChatBoard -> String;
+    render = |name, chat_board| (
+        let history = chat_board.@history.to_iter
+                .map(|chat| chat.to_element.to_html)
+                .concat_iter;
+        let name = escape_html(name);
+        let html = chat_board.@template;
+        // TODO: use template
+        let html = html.replace_all("${history}", history).replace_all("${name}", name);
+        html
+    );
+
+    _DEFAULT_NAME: String;
+    _DEFAULT_NAME = "Anonymous😀";
+
+    on_get: Var AppState -> Request -> Response -> IOFail Response;
+    on_get = |app_state_var, req, res| (
+        let name = req.find_query("name").map_or(_DEFAULT_NAME, |name|name);
+        let chat_board = *app_state_var.get.map(@chat_board).lift;
+        let html = chat_board.render(name);
+        res.content_type("html").write_str(html)
+    );
+
+    on_post: Var AppState -> Request -> Response -> IOFail Response;
+    on_post = |app_state_var, req, res| (
+        let name = req.find_query("name").map_or(_DEFAULT_NAME, |name|name);
+        let message = req.find_query("message").map_or("", |s| s);
+        // eval debug_eprintln("name="+name+" message="+message);
+        let _ = *if name == "" && message == "" {
+            pure()
+        } else {
+            app_state_var.mod(
+                mod_chat_board(add_chat(Chat::make(name, message)))
+            ).lift
+        };
+        let chat_board = *app_state_var.get.map(@chat_board).lift;
+        let html = chat_board.render(name);
+        res.content_type("html").write_str(html)
+    );
+}
+
+type AppState = unbox struct {
+    asset_dir: String,
+    chat_board: ChatBoard
+};
+
+namespace AppState {
+    initialize: IOFail (Var AppState);
+    initialize = (
+        let _ = *pure();    // make it lazy
+        let args = *IO::get_args.lift;
+        let app_dir = if args.get_size > 0 { dirname(args.@(0)) } else { "." };
+        let asset_dir = join_paths([app_dir, "assets/"]);
+        let state = AppState {
+            asset_dir: asset_dir,
+            chat_board: ChatBoard::empty
+        };
+        let chat_board = *state.@chat_board.read_template(
+            Path::parse(state.@asset_dir + "chat_board.html").as_some
+        );
+        let state = state.set_chat_board(chat_board);
+        let state_var = *Var::make(state).lift;
+        pure $ state_var
+    );
+}
+
+command: Command;
+command = (
+    Command::new("sample_http_server.out")
+    .version("1.0")
+    .about("Sample http server")
+    .arg(Arg::new("host").short('h').long("host").help("IP address to liten").takes_value.default_value("127.0.0.1"))
+    .arg(Arg::new("port").short('p').long("port").help("port number to listen").takes_value.default_value("8080"))
+);
+
+
+main: IO ();
+main = (
+    do {
+        let matches = *command.get_matches;
+        let host = matches.get_one("host").as_some;
+        let port = matches.get_one("port").as_some;
+        let server_host_port = host + ":" + port;
+
+        let app_state_var = *AppState::initialize;
+        let app = App::make();
+        let app = app.on("GET", "/", ChatBoard::on_get(app_state_var));
+        let app = app.on("POST", "/", ChatBoard::on_post(app_state_var));
+        let app = *app.listen(server_host_port);
+        pure()
+    }
+    .try(|err| eprintln(err))
+);

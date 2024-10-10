@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>FixLang Chat Room Demo</title>
+<style>
+body {background: #ffe; }
+div.note1 {background: #fcc; margin-bottom: 2vmin; }
+div.note { color: #f88; margin-bottom: 2vmin; }
+div.history {background: #fed; padding: 2vmin;}
+div.chat {border-bottom: 1px solid #888; margin-bottom: 2vh; }
+span.name { color: #174; width: 15vw; margin-right: 5vw; }
+form {border:1px solid #888; border-radius: 2vmin; margin: 5vmin; padding: 2vmin; }
+input.name { width: 10vw; }
+input.message { width: 60vw; }
+</style>
+</head>
+<body>
+<h1>FixLang Chat Room Demo</h1>
+<div class="note">Note: this is HTTP server demo. The chat messages are only stored in memory
+    and cleared when the demo program is terminated.</div>
+<div class="history">
+    <div class="chat"><span class="name">Alice</span><span class="message">Hi there</span></div>
+    <div class="chat"><span class="name">Bob</span><span class="message">FixLang is nice 😊</span></div>
+    ${history}
+</div>
+<form action="/" method="post">
+<label>Name: <input class="name" name="name" type="text" maxlength="40" value="${name}"></label>
+<label>Message: <input class="message" name="message" type="text" maxlength="100"></label>
+<input type="submit" value="Send">
+</form>
+</body>
+</html>

@@ -1,0 +1,927 @@
+// Sudoku problem generator & solver
+// cf. [Wikipedia: Sudoku](https://en.wikipedia.org/wiki/Sudoku)
+//
+// 数独の問題の作成と解決を行うプログラム。
+//
+// $ sudoku.out solve [-i INPUT-FILE]           # 数独の問題を解決する
+// $ sudoku.out generate [-o OUTPUT-FILE]       # 数独の問題を作成する
+//
+// 数独の問題は以下のような9行9列の文字列として表現する。
+// 各マスは数字('1'から'9')または空き('.')とする。他の文字は無視される。
+// ```
+// 53..7....
+// 6..195...
+// .98....6.
+// 8...6....
+// 4..8.3..1
+// 7...2...6
+// .6....28.
+// ...419..5
+// ....8..79
+// ```
+module Main;
+
+import AsyncTask;
+import Random;
+import Time;
+
+import Minilib.App.Clap;
+import Minilib.Encoding.Xml;
+import Minilib.Common.RandomEx;
+import Minilib.Media.Svg;
+import Minilib.Text.StringEx;
+
+// ------------------------------------------------------------
+// ヘルパー定義
+// ------------------------------------------------------------
+
+// バイト配列を文字列に変換する
+bytes_to_string: Array U8 -> String;
+bytes_to_string = |bytes| bytes.push_back(0_U8)._unsafe_from_c_str;
+
+// 文字列に含まれる文字のうち、指定した条件を満たす文字だけを残す
+filter_chars: (U8 -> Bool) -> String -> String;
+filter_chars = |f, str| (
+    str.get_bytes.pop_back.to_iter.filter(f).to_array.bytes_to_string
+);
+
+// ファイルストリームをフラッシュする。
+fflush : IOHandle -> IOFail ();
+fflush = |handle| (
+    let _ = *pure();    // make it lazy
+    let res = FFI_CALL[I32 fflush(Ptr), handle._file_ptr];
+    if res < 0_I32 {
+        throw("flush failed!: some error occurred in fflush.")
+    };
+    pure()
+);
+
+// ------------------------------------------------------------
+//  盤面の管理
+// ------------------------------------------------------------
+
+// 数字 (1 から 9)
+type Digit = U8;
+
+// 盤面 (9 x 9 マス)
+type Board = unbox struct {
+    data: Array (Option Digit)      // 9 x 9
+};
+
+namespace Board {
+    // 初期状態の盤面
+    empty: Board;
+    empty = Board {
+        data: Array::fill(9 * 9, none())
+    };
+
+    // 指定したマスの数字を取得する
+    get_digit: I64 -> I64 -> Board -> Option Digit;
+    get_digit = |row, col, board| board.@data.@(row * 9 + col);
+
+    // 指定したマスの数字を設定する
+    set_digit: I64 -> I64 -> Option Digit -> Board -> Board;
+    set_digit = |row, col, digit, board| board.mod_data(set(row * 9 + col, digit));
+
+    // 数字が配置されたマスの数を数える
+    get_digit_count: Board -> I64;
+    get_digit_count = |board| (
+        board.@data.to_iter.map(|digit| if digit.is_some { 1 } else { 0 })
+        .fold(0, add)
+    );
+
+    // マスのイテレータ
+    cells: Iterator (I64, I64);
+    cells = do {
+        let row = *Iterator::range(0, 9);
+        let col = *Iterator::range(0, 9);
+        pure $ (row, col)
+    };
+
+    // 数字が配置されているマスのイテレータを返す
+    get_nonempty_cells: Board -> Iterator (I64, I64);
+    get_nonempty_cells = |board| (
+        Board::cells.filter(|(row, col)| board.get_digit(row, col).is_some)
+    );
+
+    // 数字が配置されていないマスのイテレータを返す
+    get_empty_cells: Board -> Iterator (I64, I64);
+    get_empty_cells = |board| (
+        Board::cells.filter(|(row, col)| board.get_digit(row, col).is_none)
+    );
+}
+
+// 数独の問題を表す文字列から盤面を読み込む。
+impl Board: FromString {
+    from_string = |problem| (
+        // 問題を行に分割する。
+        let lines = problem.split("\n");
+        // 数字(1から9)と空き('.')以外の文字を除去する。
+        let lines = lines.map(
+            filter_chars(|c| ('1' <= c && c <= '9') || c == '.')
+        );
+        // 空行を除去する。
+        let lines = lines.filter(|s| s != "");
+        // イテレータから配列に変換する。
+        let lines = lines.to_array;
+        // 9行9列であることを確認する。
+        if lines.get_size != 9 { err $ "invalid row size" };
+        let _ = *lines.to_iter.fold_m(
+            (), |_, line|
+            if line.get_size != 9 { err $ "invalid col size" };
+            ok()
+        );
+        // 盤面の各マスを読み込む。
+        let board = Board::empty;
+        Iterator::range(0, 9).fold_m(board, |board, row|
+            Iterator::range(0, 9).fold_m(board, |board, col|
+                let line = lines.@(row);
+                let c = line.get_bytes.@(col);
+                let digit = if '1' <= c && c <= '9' { some(c - '1' + 1_U8) } else { none() };
+                let board = board.set_digit(row, col, digit);
+                pure $ board
+            )
+        )
+    );
+}
+
+impl Board: ToString {
+    to_string = |board| (
+        Iterator::range(0, 9).map(|row|
+            Iterator::range(0, 9).map(|col|
+                let digit = board.get_digit(row, col);
+                if digit.is_none { '.' } else { digit.as_some - 1_U8 + '1' }
+            ).to_array.bytes_to_string
+        ).join("\n")
+    );
+}
+
+// ------------------------------------------------------------
+//  配置可能候補の管理
+// ------------------------------------------------------------
+
+// 特定のマスに数字を置けるかどうかを表わすビットベクトル。
+// i 番目のビットは数字 i が配置可能(1)または配置不可(0)であることを表す。(i = 1..9)
+type BitVec = U16;
+
+namespace BitVec {
+    // すべての数字が配置可能であるビットベクトル。
+    full: BitVec;
+    full = 0b1111111110_U16;    //  bit 1..9
+
+    // すべての数字が配置不可であるビットベクトル。
+    empty: BitVec;
+    empty = 0_U16;
+
+    // i 番目のビットを取得する。
+    get_bit: I64 -> BitVec -> Bool;
+    get_bit = |i, vec| vec.bit_and(1_U16.shift_left(i.to_U16)) != 0_U16;
+
+    // i 番目のビットを設定する。
+    set_bit: I64 -> Bool -> BitVec -> BitVec;
+    set_bit = |i, b, vec| (
+        if b { vec.bit_or(1_U16.shift_left(i.to_U16)) }
+        else { vec.bit_and(1_U16.shift_left(i.to_U16).bit_xor(0xffff_U16)) }
+    );
+
+    // 配置可能な候補の数を求める。
+    get_num_candidates: BitVec -> I64;
+    get_num_candidates = |vec| (
+        // 1 (配置可能) の数を数える。
+        let vec = vec.shift_right(1_U16).bit_and(0x5555_U16) + vec.bit_and(0x5555_U16);
+        let vec = vec.shift_right(2_U16).bit_and(0x3333_U16) + vec.bit_and(0x3333_U16);
+        let vec = vec.shift_right(4_U16).bit_and(0x0f0f_U16) + vec.bit_and(0x0f0f_U16);
+        let vec = vec.shift_right(8_U16).bit_and(0x00ff_U16) + vec.bit_and(0x00ff_U16);
+        vec.to_I64
+    );
+
+    // 配置可能な数字のイテレータを返す。
+    to_iter: BitVec -> Iterator I64;
+    to_iter = |vec| (
+        Iterator::range(1, 9 + 1).filter(|digit| vec.get_bit(digit))
+    );
+}
+
+// 9 x 9 マスの配置可能候補を管理する
+type Candidates = unbox struct {
+    data: Array BitVec  // 9 x 9
+};
+
+namespace Candidates {
+    //  初期状態(すべての数字を配置可能)
+    full: Candidates;
+    full = Candidates {
+        data: Array::fill(9 * 9, BitVec::full)
+    };
+
+    // 指定したマスの配置可能候補を取得する
+    get_bitvec: I64 -> I64 -> Candidates -> BitVec;
+    get_bitvec = |row, col, cand| cand.@data.@(row * 9 + col);
+
+    // 指定したマスの配置可能候補を更新する
+    mod_bitvec: I64 -> I64 -> (BitVec -> BitVec) -> Candidates -> Candidates;
+    mod_bitvec = |row, col, f, cand| (
+        cand.mod_data(mod(row * 9 + col, f))
+    );
+
+    // 指定した行全体の配置可能候補を更新する
+    mod_row: I64 -> (BitVec -> BitVec) -> Candidates -> Candidates;
+    mod_row = |row, f, cand| Iterator::range(0, 9).fold(
+        cand, |cand, col| cand.mod_bitvec(row, col, f)
+    );
+
+    // 指定した列全体の配置可能候補を更新する
+    mod_col: I64 -> (BitVec -> BitVec) -> Candidates -> Candidates;
+    mod_col = |col, f, cand| Iterator::range(0, 9).fold(
+        cand, |cand, row| cand.mod_bitvec(row, col, f)
+    );
+
+    // 指定したマスを含むブロックの配置可能候補を更新する
+    mod_block: I64 -> I64 -> (BitVec -> BitVec) -> Candidates -> Candidates;
+    mod_block = |row, col, f, cand| (
+        let top = row / 3 * 3;
+        let left = col / 3 * 3;
+        Iterator::range(0, 9).fold(
+            cand, |cand, i| cand.mod_bitvec(top + i / 3, left + i % 3, f)
+        )
+    );
+
+    // 指定したマスを含む行、列、ブロックの配置可能候補を更新する
+    mod_all: I64 -> I64 -> (BitVec -> BitVec) -> Candidates -> Candidates;
+    mod_all = |row, col, f, cand| (
+        cand.mod_row(row, f)
+        .mod_col(col, f)
+        .mod_block(row, col, f)
+    );
+
+    // 盤面をもとに配置可能候補を初期化する
+    init_with_board: Board -> Candidates;
+    init_with_board = |board| (
+        let cand = Candidates::full;
+        Iterator::range(0, 9).fold(cand, |cand, row|
+            Iterator::range(0, 9).fold(cand, |cand, col|
+                let digit = board.get_digit(row, col);
+                if digit.is_none { cand };
+                let digit = digit.as_some.to_I64;
+                eval assert(|_| (digit, (row, col)).format("could not place {} at {}"),
+                    cand.get_bitvec(row, col).get_bit(digit) == true
+                );
+                cand.mod_all(row, col, set_bit(digit, false))
+            )
+        )
+    );
+
+    // 空のマスのうち、候補数が最も少ないマスを求める。
+    // 成功時は `some(候補数, 行, 列)` が返る。
+    // 候補数は0の場合もある。(そのマスにはどの数字も配置できないことを意味する)
+    // 空のマスがないときは `none()` が返る。
+    find_min_candidates_cell: Board -> Candidates -> Option (I64, I64, I64);
+    find_min_candidates_cell = |board, cand| (
+        let min_cell: Option (I64, I64, I64) = none();
+        board.get_empty_cells.fold(min_cell, |min_cell, (row, col)|
+            let bitvec = cand.get_bitvec(row, col);
+            let num_cand = bitvec.get_num_candidates;
+            if min_cell.is_none || min_cell.as_some.@0 > num_cand {
+                some $ (num_cand, row, col)
+            } else { min_cell }
+        )
+    );
+}
+
+// ------------------------------------------------------------
+//  数独を解く
+// ------------------------------------------------------------
+
+// 盤面と配置可能候補の状態
+type BoardState = unbox struct {
+    board: Board,                   //  盤面
+    candidates: Candidates,         //  配置可能候補
+    digit_count: I64                //  配置済みの数字の数
+};
+
+namespace BoardState {
+    // 空の盤面状態
+    empty: BoardState;
+    empty = BoardState {
+        board: Board::empty,
+        candidates: Candidates::full,
+        digit_count: 0
+    };
+
+    // 問題を読み込む。
+    load_problem: String -> Result ErrMsg BoardState;
+    load_problem = |problem| (
+        let board: Board = *from_string(problem);
+        pure $ BoardState::init_with_board(board)
+    );
+
+    // 盤面をもとに状態を初期化する。
+    init_with_board: Board -> BoardState;
+    init_with_board = |board| (
+        let candidates = Candidates::init_with_board(board);
+        let digit_count = board.get_digit_count;
+        BoardState {
+            board: board,
+            candidates: candidates,
+            digit_count: digit_count
+        }
+    );
+
+    // 指定したマスに数字を配置する。
+    place_digit: I64 -> I64 -> I64 -> BoardState -> BoardState;
+    place_digit = |row, col, digit, state| (
+        eval assert(|_| "digit is already set", state.@board.get_digit(row, col).is_none);
+        state.mod_board(set_digit(row, col, some(digit.to_U8)))
+             .mod_candidates(mod_all(row, col, set_bit(digit, false)))
+             .mod_digit_count(add(1))
+    );
+}
+
+impl BoardState: ToString {
+    to_string = |state| state.@board.to_string;
+}
+
+// 数独の問題を解くための構造体
+type Solver = unbox struct {
+    stack: Array BoardState,        //  盤面状態のスタック
+    max_solutions: I64,             //  解の最大個数
+    solutions: Array BoardState,    //  解のリスト
+    max_step: I64,                  //  最大ステップ数
+    step: I64,                      //  ステップ数
+    progress: Bool                  //  進捗表示を行うならtrue
+};
+
+namespace Solver {
+    //  数独の問題を解くための構造体を作成する。
+    make: () -> Solver;
+    make = |_| (
+        Solver {
+            stack: [],
+            max_solutions: 10,
+            solutions: [],
+            max_step: 10000,
+            step: 0,
+            progress: false
+        }
+    );
+
+    // 進捗状況を表示する。
+    _progress: Lazy String -> Solver -> IOFail ();
+    _progress = |message, solver| (
+        if !solver.@progress { pure() };
+        let _ = *println(message()).lift;
+        fflush(IO::stdout)
+    );
+
+    // 数独の問題を解いて解を出力する。
+    solve_problem_and_print_solutions: BoardState -> Solver -> IOFail (Array BoardState);
+    solve_problem_and_print_solutions = |state, solver| (
+        let (solutions, step) = *solver.solve(state);
+        let _ = *println((solutions.get_size, step).format("{} 個の解が見つかりました。(ステップ数: {})")).lift;
+        eval *solutions.to_iter.fold_m(
+            (), |_, state|
+            println("\n" + state.to_string).lift
+        );
+        pure $ solutions
+    );
+
+    // 数独の問題を解く。
+    solve: BoardState -> Solver -> IOFail (Array BoardState, I64);
+    solve = |state, solver| (
+        let solver = solver.set_solutions([])
+                           .set_stack([state])
+                           .set_step(0);
+        _solve_inner(solver)
+    );
+
+    // スタックから盤面状態を1つ取り出し、数字の配置を試みる。
+    _solve_inner: Solver -> IOFail (Array BoardState, I64);
+    _solve_inner = |solver| (
+        let solver = solver.mod_step(add(1));
+        if solver.@step > solver.@max_step { throw $ "最大ステップ数を超えました" };
+        if solver.@solutions.get_size > solver.@max_solutions { throw $ "解の最大個数を超えました" };
+
+        //  スタックから盤面状態を1つ取り出す。
+        let opt = solver._pop_stack;
+        if opt.is_none {
+            //  スタックが空の場合(探索する盤面が尽きた場合)、見つかった解を返す。
+            pure $ (solver.@solutions, solver.@step)
+        };
+        let (state, solver) = opt.as_some;
+        let _ = *solver._progress(|_| [state.@digit_count, solver.@stack.get_size].format("{}: _solve_inner: stack size={}"));
+
+        //  9 x 9 個のマスがすべて埋まったら解を記録する。
+        if state.@digit_count >= 9 * 9 {
+            let _ = *solver._progress(|_| [state.@digit_count].format("{}: 解が見つかりました"));
+            let solver = solver.mod_solutions(push_back(state));
+            solver._solve_inner
+        };
+
+        // 空のマスのうち、候補数が最も少ないマスを検索する。
+        let min_cell = state.@candidates.find_min_candidates_cell(state.@board);
+        if min_cell.is_none {
+            // 空のマスがない
+            let _ = *solver._progress(|_| [state.@digit_count].format("{}: 空のマスがありません"));
+            solver._solve_inner
+        };
+        let (num_cand, row, col) = min_cell.as_some;
+        if num_cand == 0 {
+            // 候補数が0のマスにはどの数字も配置できないため、その盤面は解にならない。
+            let _ = *solver._progress(|_| (state.@digit_count, row, col).format("{}: ({}, {}) に配置できる数字がありません"));
+            solver._solve_inner
+        };
+
+        //  候補の各々について、その数字を配置した盤面を生成し、スタックに積む。
+        let bitvec = state.@candidates.get_bitvec(row, col);
+        let _ = *solver._progress(|_| (state.@digit_count, (row, col), bitvec.to_iter.map(to_string).join(","))
+                                .format("{}: {} に配置可能な数字: {}"));
+        let solver = bitvec.to_iter.fold(solver, |solver, digit|
+            solver._push_stack(state.place_digit(row, col, digit))
+        );
+        solver._solve_inner
+    );
+
+    //  スタックに盤面状態を積む。
+    _push_stack: BoardState -> Solver -> Solver;
+    _push_stack = |state, solver| (
+        solver.mod_stack(push_back(state))
+    );
+
+    //  スタックから盤面状態を1つ取り出す。スタックが空の場合は none() を返す。
+    _pop_stack: Solver -> Option (BoardState, Solver);
+    _pop_stack = |solver| (
+        solver.@stack.get_last.map(|state|
+            (state, solver.mod_stack(pop_back))
+        )
+    );
+}
+
+// ------------------------------------------------------------
+//  数独の問題を作成する
+// ------------------------------------------------------------
+
+// 問題作成器
+type Generator = unbox struct {
+    max_retry: I64,                 //  穴開け処理の最大試行回数
+    min_digit_count: I64,           //  数字の最小配置数
+    var_random: Var Random,         //  Random の変数
+    solver: Solver,                 //  数独の問題を解くソルバー
+    progress: Bool                  //  進捗表示するならtrue
+};
+
+namespace Generator {
+    //  問題作成器を構築する。
+    make: I64 -> I64 -> Var Random -> Solver -> Generator;
+    make = |max_retry, min_digit_count, var_random, solver| (
+        Generator {
+            max_retry: max_retry,
+            min_digit_count: min_digit_count,
+            var_random: var_random,
+            solver: solver,
+            progress: true
+        }
+    );
+
+    // 数独の問題を作成し、唯一解を持つことを検証する。
+    generate_and_validate: Generator -> IOFail BoardState;
+    generate_and_validate = |gen| (
+        let _ = *gen._progress(|_| "問題を作成します");
+        //  すべての数字を配置した盤面をランダムに作成する。
+        let board = *gen._generate_random_full_board;
+        //  穴を空ける
+        let state = *gen._make_holes(board);
+        //  問題が唯一解を持つことを検証する
+        let _ = *gen._validate_solution(state);
+        pure $ state
+    );
+
+    // 数独の問題が唯一解を持つことを検証する。
+    _validate_solution: BoardState -> Generator -> IOFail ();
+    _validate_solution = |state, gen| (
+        let _ = *gen._progress(|_| "作成した問題を検証します");
+        let res = *gen.@solver.solve(state).to_result.lift;
+        if res.is_err {
+            throw $ res.as_err
+        };
+        let (solutions, solve_step) = res.as_ok;
+        let _ = *gen._progress(|_| [solutions.get_size, solve_step, state.@digit_count]
+                    .format("検証結果: 解の数={} ステップ数={} 数字の数={}"));
+        if solutions.get_size == 0 {
+            throw $ "解なし"
+        };
+        if solutions.get_size > 1 {
+            throw $ "複数解あり"
+        };
+        pure $ ()
+    );
+
+    // 進捗状況を表示する。
+    _progress: Lazy String -> Generator -> IOFail ();
+    _progress = |message, gen| (
+        if !gen.@progress { pure() };
+        let _ = *println(message()).lift;
+        fflush(IO::stdout)
+    );
+
+    // var_random を用いて乱数を生成する。
+    // f は乱数を生成する関数。
+    _with_random: (Random -> (Random, a)) -> Generator -> IOFail a;
+    _with_random = |f, gen| (
+        eval *pure();
+        gen.@var_random.lock(|random|
+            let (random, a) = f(random);
+            let _ = *gen.@var_random.Var::set(random);
+            pure $ a
+        ).lift
+    );
+
+    // var_random を用いて配列の要素をランダムに選択する。
+    _select_random: Array a -> Generator -> IOFail a;
+    _select_random = |array, gen| (
+        eval assert(|_| "array is empty", array.get_size >= 1);
+        let i = *gen._with_random(generate_I64_range(0, array.get_size));
+        pure $ array.@(i)
+    );
+
+    // すべての数字を配置した盤面をもとに、穴を1つずつ空ける。
+    // 穴を空けた結果、唯一解を持たなくなったら、一つ前の盤面を問題として返す。
+    _make_holes: Board -> Generator -> IOFail BoardState;
+    _make_holes = |board, gen| (
+        let state = BoardState::init_with_board(board);
+        loop_m(
+            (state, 0), |(state, retry)|
+            if state.@digit_count <= gen.@min_digit_count {
+                break_m $ state
+            };
+
+            // 数字があるマスを1つ選択する
+            let nonempty_cells = state.@board.get_nonempty_cells.to_array;
+            let (row, col) = *gen._select_random(nonempty_cells);
+            eval assert(|_| "should be nonempty", state.@board.get_digit(row, col).is_some);
+
+            // ランダムに1つ穴を開けた新しい盤面を作成する
+            let new_board = state.@board.set_digit(row, col, none());
+            let new_state = BoardState::init_with_board(new_board);
+            // 新しい盤面が唯一解を持つか確認する
+            let res = *gen.@solver.solve(new_state).to_result.lift;
+            let res = res.map(|(solutions, solve_step)| solutions.get_size == 1);
+            if res.is_err || res.as_ok == false {
+                // 穴を開けたら唯一解を持たなくなった
+                let retry = retry + 1;
+                if retry >= gen.@max_retry {
+                    let _ = *gen._progress(|_| (state.@digit_count, retry).format("{}: 穴空けの最大試行回数を超えました (retry={})"));
+                    break_m $ state
+                };
+                //let _ = *gen._progress(|_| (state.@digit_count, retry).format("{}: 穴開けを再試行します (retry={})"));
+                continue_m $ (state, retry)
+            };
+            continue_m $ (new_state, 0)
+        )
+    );
+
+    // すべての数字を配置した盤面をもとに、数独の制約条件を満たしたまま
+    // 数字・行・列をランダムに入れ替える。
+    _generate_random_full_board: Generator -> IOFail Board;
+    _generate_random_full_board = |gen| (
+        let board = BoardEx::full_board;
+        //  数字をランダムに置換する。
+        let subst = *gen._with_random(shuffle(Iterator::range(0, 9).to_array));
+        let board = board.subst_digit(subst);
+
+        // 0以上6未満の乱数生成器
+        let random6 = gen._with_random(generate_I64_range(0, 6));
+        // 行をランダムに置換する。
+        let board = board.permute3(add_offset(swap_rows, 0), *random6);
+        let board = board.permute3(add_offset(swap_rows, 3), *random6);
+        let board = board.permute3(add_offset(swap_rows, 6), *random6);
+        // 列をランダムに置換する。
+        let board = board.permute3(add_offset(swap_cols, 0), *random6);
+        let board = board.permute3(add_offset(swap_cols, 3), *random6);
+        let board = board.permute3(add_offset(swap_cols, 6), *random6);
+        // ブロックをランダムに置換する。
+        let board = board.permute3(swap_blocks(swap_rows), *random6);
+        let board = board.permute3(swap_blocks(swap_cols), *random6);
+
+        pure $ board
+    );
+
+    // 盤面生成用の処理
+    // 参考にしたサイト: https://nanpre.adg5.com/make_sys1.html
+    namespace BoardEx {
+        // 数独の制約条件を満たすようにすべての数字を配置した盤面。
+        // 盤面生成処理では、これをランダムに置換する。
+        full_board: Board;
+        full_board = (
+            let board = Board::empty;
+            let start = [0, 3, 6, 1, 4, 7, 2, 5, 8];
+            Iterator::range(0, 9).fold(
+                board, |board, row|
+                Iterator::range(0, 9).fold(
+                    board, |board, col|
+                    let digit = some $ ((start.@(row) + col) % 9 + 1).to_U8;
+                    board.set_digit(row, col, digit)
+                )
+            )
+        );
+
+        // 数字を置換する。
+        // subst は `Iterator::range(0, 9).to_array` をシャッフルした配列。
+        subst_digit: Array I64 -> Board -> Board;
+        subst_digit = |subst, board| (
+            Iterator::range(0, 9).fold(
+                board, |board, row|
+                Iterator::range(0, 9).fold(
+                    board, |board, col|
+                    let digit = board.get_digit(row, col);
+                    let digit = digit.map(|i| (subst.@(i.to_I64 - 1) + 1).to_U8);
+                    board.set_digit(row, col, digit)
+                )
+            )
+        );
+
+        // 2つのマスを交換する。
+        swap_cells: (I64, I64) -> (I64, I64) -> Board -> Board;
+        swap_cells = |(row1, col1), (row2, col2), board| (
+            let digit1 = board.get_digit(row1, col1);
+            let digit2 = board.get_digit(row2, col2);
+            board.set_digit(row1, col1, digit2)
+                .set_digit(row2, col2, digit1)
+        );
+
+        //  行/列/ブロックを交換する `swap` 関数の型。
+        //  インターフェイス: `board.swap(index1, index2)`
+        //  `index1`, `index2` は行/列/ブロックのインデックス。(0以上3未満)
+        type Swapper = I64 -> I64 -> Board -> Board;
+
+        // 2つの行を交換する。
+        swap_rows: Swapper;
+        swap_rows = |row1, row2, board| (
+            if row1 == row2 { board };
+            Iterator::range(0, 9).fold(
+                board, |board, col|
+                board.swap_cells((row1, col), (row2, col))
+            )
+        );
+
+        // 2つの列を交換する。
+        swap_cols: Swapper;
+        swap_cols = |col1, col2, board| (
+            if col1 == col2 { board };
+            Iterator::range(0, 9).fold(
+                board, |board, row|
+                board.swap_cells((row, col1), (row, col2))
+            )
+        );
+
+        //  2つのブロックを交換する。
+        swap_blocks: Swapper -> Swapper;
+        swap_blocks = |swap, block1, block2| (
+            swap(block1 * 3 + 0, block2 * 3 + 0) >>
+            swap(block1 * 3 + 1, block2 * 3 + 1) >>
+            swap(block1 * 3 + 2, block2 * 3 + 2)
+        );
+
+        //  行/列の交換時のインデックスにオフセットを加算する。
+        add_offset: Swapper -> I64 -> Swapper;
+        add_offset = |swap, offset| (
+            |idx1, idx2| swap(idx1 + offset, idx2 + offset)
+        );
+
+        //  3つの行/列/ブロックをランダムな順列で入れ替える。permは0..6の乱数。
+        permute3: Swapper -> I64 -> Board -> Board;
+        permute3 = |swap, perm, board| (
+            let board = board.swap(perm % 3, (perm + 1) % 3);
+            let board = if perm / 3 == 0 { board } else { board.swap(1, 2) };
+            board
+        );
+    }
+}
+
+// ------------------------------------------------------------
+//  SVG出力
+// ------------------------------------------------------------
+
+namespace BoardSvg {
+    make_board_svg: Board -> XmlElement;
+    make_board_svg = |board| (
+        let fill = Svg::fill;
+        let line_width_L = 5.0;
+        let line_width_S = 2.0;
+        let cell_size = 60.0;
+        let board_size = cell_size * 9.0 + line_width_L;
+        let font_siz = 40.0;
+        let background = rect(0.0, 0.0, board_size, board_size)
+                        .fill("white");
+        let lines = Svg::group.fill("black");
+        let lines = Iterator::range(0, 9 + 1).fold(
+            lines, |lines, i|
+            let lw = if i % 3 == 0 { line_width_L } else { line_width_S };
+            let hline = Svg::rect(0.0, i.to_F64 * cell_size, board_size, lw);
+            let vline = Svg::rect(i.to_F64 * cell_size, 0.0, lw, board_size);
+            lines.add(hline).add(vline)
+        );
+        let texts = Svg::group.fill("black")
+                    .font_family("SansSerif").font_size(font_siz);
+        let texts = Iterator::range(0, 9).fold(
+            texts, |texts, row|
+            Iterator::range(0, 9).fold(
+                texts, |texts, col|
+                let digit = board.get_digit(row, col);
+                if digit.is_none { texts };
+                let text = Svg::text(digit.as_some.to_string)
+                        .xy(col.to_F64 * cell_size + cell_size / 2.0 + line_width_L / 2.0,
+                            row.to_F64 * cell_size + cell_size / 2.0 + line_width_L / 2.0 + font_siz * 0.3)
+                        .attr("text-anchor","middle")
+                        //.attr("dominant-baseline", "middle")
+                        ;
+                texts.add(text)
+            )
+        );
+        let scale = 1.0;
+        Svg::svg(board_size * scale, board_size * scale)
+            .view_box(0.0, 0.0, board_size, board_size)
+            .add(background)
+            .add(lines)
+            .add(texts)
+    );
+
+    write_board_to_svg_file: String -> BoardState -> IOFail ();
+    write_board_to_svg_file = |filepath, state| (
+        let svg = make_board_svg(state.@board);
+        svg.write_file(filepath)
+    );
+}
+
+// ------------------------------------------------------------
+//  テストケース
+// ------------------------------------------------------------
+
+problem1: String;   // 50 steps
+problem1 = "
+.....4..6
+7635..1.2
+1.476...8
+231..7...
+8..2...79
+.9...5...
+..8.7296.
+.7.....8.
+.5.4....7
+";
+
+problem2: String;   // 67 steps ... easy?
+problem2 = "
+..35...79
+..8...24.
+.15.....6
+26.....9.
+.5..8....
+..13.4...
+.........
+.4.16..5.
+..9....32
+";
+
+problem3: String;   // 799 steps ... hard?
+problem3 = "
+.5.7..1..
+....24...
+..2......
+3.......6
+.....8.1.
+19.3...7.
+.....5.21
+.7...18.3
+2.6.8.9..
+";
+
+problem4: String;  // 188 steps
+problem4 = "
+.145...2.
+..31..7..
+....79...
+..6...49.
+....645..
+........3
+6.8..2..9
+...4.....
+3.7.1..5.
+";
+
+command_solve: Command;
+command_solve = (
+    Command::new("solve")
+    .display_name("sudoku.out solve")
+    .about("数独の問題を解決します。")
+    .arg(Arg::new("input").short('i').long("input").help("数独問題ファイル。未指定時はサンプルの問題を解決する。").takes_value)
+    .arg(Arg::new("max_step").short('d').long("max-step").help("問題解決の最大ステップ数").takes_value.default_value("100"))
+    .arg(Arg::new("verbose").short('v').long("verbose").help("進捗状況を表示する").default_value("false"))
+);
+
+run_command_solve: ArgMatches -> IOFail ();
+run_command_solve = |submatches| (
+    let input_path = submatches.get_one("input").bind(Path::parse);
+    let max_step: I64 = *submatches.get_one("max_step").as_some.from_string.from_result;
+    let verbose = submatches.get_one("verbose").as_some;
+    let problem = *if input_path.is_some {
+        read_file_string(input_path.as_some)
+    } else {
+        pure $ problem4
+    };
+    let solver = Solver::make();
+    let solver = solver.set_max_step(max_step);
+    let solver = solver.set_progress(verbose == "true");
+    let state = *BoardState::load_problem(problem).from_result;
+    let solutions = *solver.solve_problem_and_print_solutions(state);
+    pure()
+);
+
+command_generate: Command;
+command_generate = (
+    Command::new("generate")
+    .display_name("sudoku.out generate")
+    .about("数独の問題を作成します。")
+    .arg(Arg::new("output").short('o').long("output").help("出力先の数独問題ファイル").takes_value)
+    .arg(Arg::new("max_retry").short('r').long("max-retry").help("穴開け処理の最大試行回数").takes_value.default_value("100"))
+    .arg(Arg::new("min_digits").short('n').long("min-digits").help("数字の最小配置数").takes_value.default_value("25"))
+    .arg(Arg::new("max_step").short('d').long("max-step").help("問題解決の最大ステップ数").takes_value.default_value("100"))
+    .arg(Arg::new("seed").short('s').long("seed").help("乱数生成器の種 (default: 現在時刻)").takes_value)
+    .arg(Arg::new("svg").short('g').long("svg").help("SVGファイルを出力する").default_value("false"))
+    .arg(Arg::new("verbose").short('v').long("verbose").help("進捗状況を表示する").default_value("false"))
+);
+
+run_command_generate: ArgMatches -> IOFail ();
+run_command_generate = |submatches| (
+    let seed = submatches.get_one("seed");
+    let max_retry: I64 = *submatches.get_one("max_retry").as_some.from_string.from_result;
+    let max_step: I64 = *submatches.get_one("max_step").as_some.from_string.from_result;
+    let min_digit_count: I64 = *submatches.get_one("min_digits").as_some.from_string.from_result;
+    let verbose = submatches.get_one("verbose").as_some;
+    let seed: U64 = *if seed.is_none {
+        let time = *Time::get_now.lift;
+        pure $ time.@sec.to_U64.bit_xor(time.@nanosec.to_U64.shift_left(32_U64))
+    } else {
+        from_string(seed.as_some).from_result
+    };
+    let random = Random::init_by_seed(seed);
+    let var_random = *Var::make(random).lift;
+    let solver = Solver::make();
+    let solver = solver.set_max_step(max_step);
+    let gen = Generator::make(max_retry, min_digit_count, var_random, solver);
+    let gen = gen.set_progress(verbose == "true");
+    let problem: BoardState = *gen.generate_and_validate;
+    eval *println("\n問題:\n" + problem.to_string + "\n").lift;
+    let solutions = *gen.@solver.solve_problem_and_print_solutions(problem);
+    eval *write_problem_file(submatches, problem);
+    pure()
+);
+
+write_problem_file: ArgMatches -> BoardState -> IOFail ();
+write_problem_file = |submatches, problem| (
+    let output_path = submatches.get_one("output");
+    if output_path.is_none { pure() };
+    let output_path = output_path.as_some;
+    eval *write_file_string(Path::parse(output_path).as_some, problem.to_string);
+    let output_svg = submatches.get_one("svg").as_some == "true";
+    if !output_svg { pure () };
+    let output_svg_path = output_path + ".svg";
+    eval *write_board_to_svg_file(output_svg_path, problem);
+    pure()
+);
+
+command_main: Command;
+command_main = (
+    Command::new("sudoku.out")
+    .version("0.1")
+    .about("数独の問題を作成または解決します。")
+    .subcommand(command_solve)
+    .subcommand(command_generate)
+);
+
+run_command_main: ArgMatches -> IOFail ();
+run_command_main = |matches| (
+    if matches.subcommand.is_none {
+        throw $ "no subcommand is specified"
+    };
+    let (name, submatches) = matches.subcommand.as_some;
+    if name == "solve" {
+        run_command_solve(submatches)
+    } else if name == "generate" {
+        run_command_generate(submatches)
+    } else {
+        throw $ "invalid subcommand: " + name
+    }
+);
+
+main: IO ();
+main = (
+    do {
+        let args = *IO::get_args.lift;
+        let args = if args.get_size <= 1 {
+            //["sudoku.out", "solve", "-v"]
+            ["sudoku.out", "generate", "-v"]
+        } else { args };
+        let matches = *command_main.get_matches_from(args).from_result;
+        run_command_main(matches)
+    }.try(eprintln)
+);

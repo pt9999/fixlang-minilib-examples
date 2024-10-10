@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>FixLang Fractal Demo</title>
+<style>
+body {background: #ffe; }
+div.hbox {display:flex; }
+div.params {border:1px solid #888; border-radius: 2vmin; margin: 5vmin; padding: 2vmin; }
+input.coord { width: 30vw; }
+input.short { width: 10vw; }
+</style>
+</head>
+<body onload="onload()">
+<h1>FixLang Fractal Demo</h1>
+<div>Zoom In: Left Click, Zoom Out: Right Click</div>
+<div>Change `loop_max` to change colors</div>
+<div class="hbox">
+
+<image id="image" width="512" height="512" draggable="false"></image>
+
+<div class="params">
+<div><label>X0: <input class="coord" name="x0" type="text" maxlength="40" value=""></label></div>
+<div><label>Y0: <input class="coord" name="y0" type="text" maxlength="40" value=""></label></div>
+<div><label>X1: <input class="coord" name="x1" type="text" maxlength="40" value=""></label></div>
+<div><label>Y1: <input class="coord" name="y1" type="text" maxlength="40" value=""></label></div>
+<div><label>loop_max: <input class="short" name="loop_max" type="text" maxlength="10" value=""></label></div>
+<input type="button" value="Render" onclick="render()">
+<input type="button" value="Undo" onclick="pop_stack()">
+<input type="button" value="Reset" onclick="reset_and_render()">
+</div>
+</div>
+<script>
+    const default_param = {
+        x0: -2.0,
+        y0: -1.25,
+        x1: 0.5,
+        y1: 1.25,
+        loop_max: 100
+    };
+    let param = { ...default_param };
+    let param_stack = [];
+    function onload () {
+        init_event_handlers();
+        reset_and_render();
+    }
+    function image_element() {
+        return document.querySelector("#image")
+    }
+    function input_element(name) {
+        return document.querySelector(`input[name=${name}]`)
+    }
+    function init_event_handlers() {
+        const image = image_element();
+        image.addEventListener('click', image_onclick);
+        image.addEventListener('contextmenu', image_oncontextmenu);
+    }
+    function reset_and_render () {
+        reset_param();
+        update_form();
+        render();
+    }
+    function reset_param () {
+        param = { ...default_param };
+        param_stack = [];
+    }
+    function pop_stack () {
+        if (param_stack.length == 0) { return }
+        param = param_stack.pop();
+        update_form();
+        render()
+    }
+    function update_form ()  {
+        for (const name in param) {
+            input_element(name).value = param[name]
+        }
+    }
+    function get_param() {
+        for (const name in param) {
+            param[name] = +input_element(name).value
+        }
+        return param
+    }
+    function render() {
+        const p = get_param();
+        const url = `/image?x0=${p.x0}&y0=${p.y0}&x1=${p.x1}&y1=${p.y1}&loop_max=${p.loop_max}`;
+        image_element().src=url;
+    }
+
+    function get_mouse_pos(e) {
+        const image = image_element();
+        const rect = image.getBoundingClientRect();
+        let x = (e.clientX - rect.x) / rect.width;
+        let y = (e.clientY - rect.y) / rect.height;
+        x = param.x0 + x * (param.x1 - param.x0);
+        y = param.y0 + y * (param.y1 - param.y0);
+        return {x, y};
+    }
+
+    function image_oncontextmenu(e) {
+        const center = get_mouse_pos(e);
+        zoom(center, false);
+        e.preventDefault();
+    }
+
+    function image_onclick(e) {
+        const center = get_mouse_pos(e);
+        zoom(center, true);
+    }
+
+    function zoom(center, zoomIn) {
+        const scale = zoomIn ? 0.2 : 1 / 0.2;
+        const r = Math.max(Math.abs(param.x1 - param.x0), Math.abs(param.y1 - param.y0)) / 2 * scale;
+        param_stack.push(param);
+        param = { ...param };
+        param.x0 = center.x - r;
+        param.y0 = center.y - r;
+        param.x1 = center.x + r;
+        param.y1 = center.y + r;
+        update_form();
+        render();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+[general]
+name = "calc-pi"
+version = "0.1.0"
+
+[build]
+output = "calc_pi.out"
+opt_level = "separated"
+files = [
+    "calc_pi.fix",
+]
+
+[[dependencies]]
+name = "minilib-common"
+version = "*"
+path = "../../fixlang-minilib-common"
+
+[[dependencies]]
+name = "minilib-app"
+version = "*"
+path = "../../fixlang-minilib-app"
+
+[[dependencies]]
+name = "minilib-math"
+version = "*"
+path = "../../fixlang-minilib-math"
