@@ -1,0 +1,413 @@
+// Generates probable prime numbers of arbitrary-precision integer.
+//
+// Sample code:
+// ```
+// let random = Random::init_by_seed(123_U64);
+// let prime_gen = *PrimeGen::make(random, true);
+// let n = *prime_gen.probable_prime(256);
+// ```
+//
+// PrimeGen uses a task pool internally, so it can run faster with multi-core CPUs.
+//
+// Depending on the value of the random number, generating a probable prime number can take some time.
+// For example, generating a 1024-bit probable prime number takes approximately 15 seconds
+// with AMD Ryzen 7 2700 (8 cores / 16 threads), or 35 seconds with MediaTek mt8183 (4 cores / 8 threads).
+//
+// NOTE: Due to multi-threading, the generated prime number is non-deterministic
+//       even if the random number generator state is the same.
+module Minilib.Math.BigIntPrime;
+
+import AsyncTask;
+import Random;
+
+import Minilib.Common.Common;
+import Minilib.Math.BigNat;
+import Minilib.Math.BigInt;
+import Minilib.Math.Types;
+import Minilib.Monad.FunctorM;
+import Minilib.Text.StringEx;
+import Minilib.Thread.Future;
+import Minilib.Thread.TaskPool;
+
+// Prime generator
+type PrimeGen = unbox struct {
+    rand_var: Var Random,
+    task_pool_var: Var TaskPool,
+    progress: Bool
+};
+
+namespace PrimeGen {
+    // Creates a prime generator.
+    make: Random -> Bool -> IO PrimeGen;
+    make = |random, progress| (
+        let rand_var = *Var::make(random);
+        let task_pool = *TaskPool::make(number_of_processors);
+        let task_pool_var = *Var::make(task_pool);
+        pure $ PrimeGen {
+            rand_var: rand_var,
+            task_pool_var: task_pool_var,
+            progress: progress
+        }
+    );
+
+    // Prints a progress message if `@progress` is true.
+    _progress: String -> PrimeGen -> IO ();
+    _progress = |str, prime_gen| (
+        if prime_gen.@progress {
+            eprint(str)
+        } else {
+            pure()
+        }
+    );
+
+    // `prime_gen._find_first_or(default, f, iter)` executes each computation in `iter`
+    // in parallel, then finds the first result that meets the specified condition.
+    // Returns the default value if no one meets the condition.
+    // This function uses the task pool for each computation.
+    _find_first_or: a -> (a -> Bool) -> Iterator (IO a) -> PrimeGen -> IO a;
+    _find_first_or = |default, f, iter, prime_gen| (
+        // Create futures for each computation.
+        let task_pool = *prime_gen.@task_pool_var.get;
+        let futures = *iter.map_m(|io| Future::make(task_pool, io)).to_result;
+        assert_lazy(|_| "Future::make failed: " + futures.as_err, futures.is_ok) $ |_|
+
+        // Wait for futures and stop at the first result that meets the condition.
+        let result = *futures.as_ok.loop_iter_m(
+            default, |result, future|
+            let a = *future.get.to_result;
+            assert_lazy(|_| "future.get failed: " + a.as_err, a.is_ok) $ |_|
+            let a = a.as_ok;
+            if f(a) {
+                break_m $ a
+            };
+            continue_m $ result
+        );
+
+        // Cancel all pending futures and clears the queue.
+        let _ = *task_pool.cancel_all_pendings_futures;
+        pure $ result
+    );
+
+    // `prime_gen.probable_prime(bit_length)` returns a probable prime number with specified bit length.
+    probable_prime: I64 -> PrimeGen -> IO BigInt;
+    probable_prime = |bit_length, prime_gen| (
+        let end = pow_by_U64(BigInt::two, bit_length.to_U64);
+        let (begin, _) = end.divmod_by_two;
+        let n = *prime_gen.generate_bigint_range(begin, end);
+        let n = *prime_gen.next_probable_prime(n);
+        if begin <= n && n < end {
+            pure $ n
+        };
+        prime_gen.probable_prime(bit_length)  // try again
+    );
+
+    // Returns a probable prime number greater than or equal to `n`.
+    next_probable_prime: BigInt -> PrimeGen -> IO BigInt;
+    next_probable_prime = |n, prime_gen| (
+        let n = *prime_gen._next_weak_probable_prime(n);
+        let ret = *prime_gen.miller_rabin(n);
+        if !ret {
+            //let id = n.to_string;
+            //let id = id.get_sub(id.get_size - 3, id.get_size);
+            let _ = *prime_gen._progress("M");
+            prime_gen.next_probable_prime(n + one)
+        };
+        //let (ret2, random) = solovay_strassen(n, random);
+        //eval if !ret2 { debug_eprintln("miller_rabin==true && solovay_strassen==false !!") } else { () };
+        let _ = *prime_gen._progress("!\n");
+        pure $ n
+    );
+
+    // Returns a weak probable prime number greater than or equal to `n`.
+    _next_weak_probable_prime: BigInt -> PrimeGen -> IO BigInt;
+    _next_weak_probable_prime = |n, prime_gen| (
+        let group_size = 50 * number_of_processors;
+        let checks = Iterator::range(0, group_size).map(|i|
+            let n = n + BigInt::from_I64(i);
+            prime_gen._is_weak_probable_prime(n)
+        );
+        let opt = *prime_gen._find_first_or(none(), is_some, checks);
+        if opt.is_none {
+            prime_gen._next_weak_probable_prime(n + BigInt::from_I64(group_size))
+        };
+        pure $ opt.as_some
+    );
+
+    // Returns true iff `n` is a weak probable prime number.
+    _is_weak_probable_prime: BigInt -> PrimeGen -> IO (Option BigInt);
+    _is_weak_probable_prime = |n, prime_gen| (
+        let _ = *pure();
+        //let id = n.to_string;
+        //let id = id.get_sub(id.get_size - 3, id.get_size);
+        //let id = FFI_CALL[I32 pthread_self()].to_string;
+        //let id = id.get_sub(id.get_size - 3, id.get_size);
+        let id = "";
+        if !check_for_small_primes(n) {
+            let _ = *prime_gen._progress("."+id);
+            pure $ none()
+        };
+        if !fermat_base2(n) {
+            let _ = *prime_gen._progress("F"+id);
+            pure $ none()
+        };
+        pure $ some(n)
+    );
+
+    // Generates random BigInt `r` of specified bit length.
+    generate_bigint:  I64 -> PrimeGen -> IO BigInt;
+    generate_bigint = |bit_length, prime_gen| (
+        assert_lazy(|_| "invalid bit_length", bit_length >= 0) $ |_|
+        let end = pow_by_U64(BigInt::two, bit_length.to_U64);
+        let (begin, _) = end.divmod_by_two;
+        prime_gen.generate_bigint_range(begin, end)
+    );
+
+    _generate_u64: PrimeGen -> IO U64;
+    _generate_u64 = |prime_gen| (
+        prime_gen.@rand_var.lock(|random|
+            let (random, u64) = random.generate_U64;
+            let _ = *prime_gen.@rand_var.Var::set(random);
+            pure $ u64
+        )
+    );
+
+    // Generates random BigInt `r` such that `begin <= r && r < end`.
+    generate_bigint_range: BigInt -> BigInt -> PrimeGen -> IO BigInt;
+    generate_bigint_range = |begin, end, prime_gen| (
+        if begin > end {
+            prime_gen.generate_bigint_range(end, begin)      // swap range and retry
+        };
+        let n = end - begin;
+        assert_lazy(|_| "invalid range", n > zero) $ |_|
+        let size = n.@nat.get_size;
+        let nat = *loop_m(
+            ([], 0), |(nat, i)|
+            let u64 = *prime_gen._generate_u64;
+            if i == size - 1 {
+                let m = n.@nat.@(size - 1).to_U64;
+                // choose 0..m uniformly
+                let u64 = u64 / (U64::maximum / (m + 1_U64));
+                if u64 > m {
+                    continue_m $ (nat, i)     // try again
+                };
+                let nat = nat.push_back(u64.to_U32);
+                break_m $ nat
+            };
+            let (_, rem) = BigNat::_divmod_base(u64);
+            let nat = nat.push_back(rem.to_U32);
+            continue_m $ (nat, i + 1)
+        );
+        let r = BigInt::make(1, nat);
+        if r >= n {
+            prime_gen.generate_bigint_range(begin, end)      // try again
+        };
+        let r = begin + r;
+        pure $ r
+    );
+
+    // Calculates `a^n`.
+    pow_by_U64: BigInt -> U64 -> BigInt;
+    pow_by_U64 = |a, n| (
+        loop(
+            (BigInt::from_I64(1), a, n), |(prod, a, n)|
+            if n == 0_U64 {
+                break $ prod
+            };
+            let prod = if n.bit_and(1_U64) != 0_U64 {
+                prod * a
+            } else { prod };
+            continue $ (prod, a*a, n.shift_right(1_U64))
+        )
+    );
+
+
+    // Performes divisibility check against small primes.
+    check_for_small_primes: BigInt -> Bool;
+    check_for_small_primes = |n| (
+        let (_, rem) = BigInt::divmod(n, BigInt::from_I64(2*3*5*7));
+        let rem = rem.to_I64;
+        if rem % 2 == 0 || rem % 3 == 0 || rem % 5 == 0 || rem % 7 == 0 {
+            // `n` is surely composite
+            false
+        };
+        let d = gcd(n, BigInt::from_I64(11*13*17*19*23*29*31));
+        if d != one {
+            // `n` is surely composite
+            false
+        };
+        // `n` is maybe composite or maybe prime
+        true
+    );
+
+    // Performes base-2 Fermat primality test.
+    // Returns true if `2^(n-1) == 1 mod n`.
+    fermat_base2: BigInt -> Bool;
+    fermat_base2 = |n| (
+        if modpow(BigInt::two, n - one, n) != one {
+            // `n` is surely composite
+            false
+        };
+        // `n` is maybe composite or maybe prime
+        true
+    );
+
+    // Performs Miller-Rabin primality test.
+    // Returns true if `n` is probably prime.
+    // Probability of false prime is less than or equal to `2^-100`.
+    // see: https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
+    miller_rabin: BigInt -> PrimeGen -> IO Bool;
+    miller_rabin = |n, prime_gen| (
+        if n.is_even {
+            // composite
+            pure $ false
+        };
+        // Determine `s` and `d` such that `n - 1 == 2^s * d`.
+        let n_minus_one = n - one;
+        let (s, d) = loop(
+            (0, n_minus_one), |(s, d)|
+            let (quo, rem) = BigInt::divmod(d, BigInt::two);
+            if rem.to_I64 != 0 {
+                break $ (s, d)
+            };
+            continue $ (s+1, quo)
+        );
+        // `k` is the number of rounds of testing to perform.
+        // Accoding to Wikipedia, probability of false prime <= `4^(-k)`.
+        let k = 50;
+        let maybe_prime: IO Bool = (
+            let _ = *pure();
+            let _ = *prime_gen._progress("o");
+            let a = *prime_gen.generate_bigint_range(two, n - two);
+            let x = modpow(a, d, n);
+            let (opt, y) = loop(
+                (s, x, x), |(s, x, y)|
+                if s < 0 {
+                    break $ (none(), y)
+                };
+                let y = (x*x) % n;
+                if y == one && x != one && x != n_minus_one {
+                    // composite
+                    break $ (some(false), y)
+                };
+                let x = y;
+                continue $ (s-1, x, y)
+            );
+            if opt.is_some {
+                pure $ opt.as_some
+            };
+            if y != one {
+                // composite
+                pure $ false
+            };
+            // maybe prime
+            pure $ true
+        );
+        let checks = Iterator::range(0, k).map(|_| maybe_prime);
+        prime_gen._find_first_or(true, |x| x == false, checks)
+    );
+
+    // Performs Solovay–Strassen primality test.
+    // see: https://en.wikipedia.org/wiki/Solovay%E2%80%93Strassen_primality_test
+    solovay_strassen: BigInt -> PrimeGen -> IO Bool;
+    solovay_strassen = |n, prime_gen| (
+        if n.is_negative {
+            prime_gen.solovay_strassen(-n)
+        };
+        if n.is_even {
+            pure $ false
+        };
+        let n_minus_one_div_two = (n - one) / BigInt::two;
+        let k = 100;
+        let maybe_prime: IO Bool = (
+            let _ = *pure();
+            let a = *prime_gen.generate_bigint_range(BigInt::two, n);
+            let x = jacobi_symbol(a, n);
+            if x == 0 {
+                pure $ false     // composite
+            };
+            let x = BigInt::from_I64(x);
+            let x_mod_n = if x.is_negative { x + n } else { x };
+            let a_pow = modpow(a, n_minus_one_div_two, n);
+            // if a^((n-1)/2) != x mod n, then n is composite
+            if a_pow != x_mod_n {
+                pure $ false     // composite
+            };
+            pure $ true
+        );
+        let checks = Iterator::range(0, k).map(|_| maybe_prime);
+        prime_gen._find_first_or(true, |x| x == false, checks)
+    );
+}
+
+// Calculates `a^n mod m`.
+modpow: BigInt -> BigInt -> BigInt -> BigInt;
+modpow = |a, n, m| (
+    loop(
+        (one, a, n), |(prod, a, n)|
+        if n == zero {
+            break $ prod
+        };
+        let (quo, rem) = n.divmod_by_two;
+        let prod = if rem != zero {
+            (prod * a) % m
+        } else { prod };
+        let a = (a * a) % m;
+        continue $ (prod, a, quo)
+    )
+);
+
+// `gcd(m,n)` returns the greatest common divisor of `abs(m)` and `abs(n)`.
+gcd: BigInt -> BigInt -> BigInt;
+gcd = |m, n| (
+    let m = m.abs;
+    let n = n.abs;
+    let cmp = BigInt::cmp(m, n);
+    if cmp < 0 { gcd(n, m) };
+    if cmp == 0 { n };
+    let loop = fix $ |loop, m, n| (
+        let rem = m % n;
+        if rem.is_zero { n };
+        loop(n, rem)
+    ) in loop(m, n)
+);
+
+// Calculates Jacobi symbol `(m/n)`.
+// see: https://en.wikipedia.org/wiki/Jacobi_symbol
+jacobi_symbol: BigInt -> BigInt -> I64;
+jacobi_symbol = |m, n| (
+    assert_lazy(|_| "invalid `n`", n.is_positive && n.is_odd) $ |_|
+    let g = gcd(m, n);
+    if g != one {
+        0
+    };
+    let n_minus_one = n - one;
+    // inner loop
+    let inner_loop = fix $ |inner_loop, accum, m, n| (
+        let m = m % n;
+        let m = if m.is_negative { m + n } else { m };
+        if m == one {
+            // `jacobi_symbol(1, n)` == 1;
+            accum * 1
+        };
+        if m == n_minus_one {
+            // `jacobi_symbol(-1, n)` == (n%4 == 1) ? 1 : -1;
+            let n_mod_4 = n._bitand_I64(3);
+            accum * if n_mod_4 == 1 { 1 } else { -1 }
+        };
+        if m.is_even {
+            let accum = accum * (
+                // `jacobi_symbol(2, n)` == (n%8 == 1 || n%8 == 7) ? 1 : -1;
+                let n_mod_8 = n._bitand_I64(7);
+                if n_mod_8 == 1 || n_mod_8 == 7 { 1 } else { -1 }
+            );
+            let (quo, _) = m.divmod_by_two;
+            inner_loop(accum, quo, n)
+        };
+        // m is odd and neither 1 nor -1
+        // `jacobi_symbol(m, n)` * `jacobi_symbol(n, m)` == (n%4 == 3 && n%4 == 3) ? -1 : 1;
+        let m_mod_4 = m._bitand_I64(3);
+        let n_mod_4 = n._bitand_I64(3);
+        let accum = if m_mod_4 == 3 && n_mod_4 == 3 { accum * -1 } else { accum * 1 };
+        inner_loop(accum, n, m)
+    ) in inner_loop(1, m, n)
+);

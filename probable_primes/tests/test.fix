@@ -1,0 +1,17 @@
+module Test;
+
+import Minilib.Testing.UnitTest;
+
+import BigintPrimeTest;
+
+testsuite: TestSuite;
+testsuite = [
+    ("BigintPrimeTest", BigintPrimeTest::main),
+];
+
+
+test: IO ();
+test = (
+    testsuite.run
+);
+

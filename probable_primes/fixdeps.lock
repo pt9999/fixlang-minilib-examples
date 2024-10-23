@@ -1,4 +1,4 @@
-proj_file_hash = "978e06ea4aa45b4ba6bc8ad4b9100d9e"
+proj_file_hash = "ae8d7a2a8c03551f6ee87cb56f154294"
 
 [[dependencies]]
 name = "minilib-common"
@@ -66,19 +66,28 @@ version = "0.1.0"
 path = "../../fixlang-minilib-math/../fixlang-minilib-binary"
 
 [[dependencies]]
+name = "math"
+version = "0.1.2"
+path = ".fixlang/deps/math_0.1.2"
+
+[dependencies.git]
+repo = "https://github.com/tttmmmyyyy/fixlang-math.git"
+rev = "88b953a6cf3bdf9d1dcada069c089edae6bc8d0c"
+
+[[dependencies]]
 name = "minilib-thread"
 version = "0.1.0"
-path = "../../fixlang-minilib-math/../fixlang-minilib-thread"
+path = "../../fixlang-minilib-thread"
 
 [[dependencies]]
 name = "minilib-io"
 version = "0.1.0"
-path = "../../fixlang-minilib-math/../fixlang-minilib-thread/../fixlang-minilib-io"
+path = "../../fixlang-minilib-thread/../fixlang-minilib-io"
 
 [[dependencies]]
 name = "minilib-collection"
 version = "0.1.0"
-path = "../../fixlang-minilib-math/../fixlang-minilib-thread/../fixlang-minilib-io/../fixlang-minilib-collection"
+path = "../../fixlang-minilib-thread/../fixlang-minilib-io/../fixlang-minilib-collection"
 
 [[dependencies]]
 name = "asynctask"
@@ -88,12 +97,3 @@ path = ".fixlang/deps/asynctask_0.2.4"
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-asynctask.git"
 rev = "78580c9f6a100023b1892129a1b4b683d2514073"
-
-[[dependencies]]
-name = "math"
-version = "0.1.2"
-path = ".fixlang/deps/math_0.1.2"
-
-[dependencies.git]
-repo = "https://github.com/tttmmmyyyy/fixlang-math.git"
-rev = "88b953a6cf3bdf9d1dcada069c089edae6bc8d0c"

@@ -1,0 +1,125 @@
+module BigintPrimeTest;
+
+import Random;
+
+import Minilib.Math.BigInt;
+import Minilib.Math.BigIntPrime;
+import Minilib.Text.StringEx;
+import Minilib.Testing.UnitTest;
+
+test_pow_by_U64: TestCase;
+test_pow_by_U64 = (
+    make_table_test("test_pow_by_U64",
+        [
+            ("63","14","15515568475732467854453889"),
+            ("25","5","9765625"),
+            ("9","13","2541865828329"),
+            ("29","25","3630362123627258663193028251474330749"),
+            ("10","27","1000000000000000000000000000"),
+            ("62","28","153803885110405674678434597293100547399764930461696"),
+            ("9","17","16677181699666569"),
+            ("839502","16","60862216133250339987002737643071824752766483288075360127422783934910172284066117611632459841536"),
+            ("5794614","10","42682034598814350963645425109548889376569046588115234261325963518976"),
+            ("3542814","14","49076878361103449079546426745336621751932053101235357413389038240495807580012083066798882816"),
+            ("6934757","4","2312730300875957816956604401"),
+            ("1","1","1")
+        ],
+        |(a, b, expect)|
+        let a: BigInt = *from_string(a).from_result;
+        let b: U64 = *from_string(b).from_result;
+        let actual = pow_by_U64(a,b);
+        //let _ = *println((a, b, actual).format("pow_by_U64({},{})={}")).lift;
+        assert_equal("eq", expect, actual.to_string)
+    )
+);
+
+test_modpow: TestCase;
+test_modpow = (
+    make_table_test("test_modpow",
+        [
+            ("996638200668","267849300996","79583","37402"),
+            ("546895490983","194270382442","79364","57561"),
+            ("646077676310","707447627011","39756","6908"),
+            ("24530172954","281411618564","94102","36388"),
+            ("177915659484","223234975025","78513","102"),
+            ("65206947438","647053153876","200732329238","47217369490"),
+            ("120900671086","730665902279","394876536233","80909464429"),
+            ("255187289740","184903273714","402856341215","65624417300"),
+            ("760818355440","598053853358","783165025932","717945122196"),
+            ("631059385361","161301869360","3319136231","1552236705"),
+            ("1","1","1","0")
+        ],
+        |(a, b, c, expect)|
+        let a: BigInt = *from_string(a).from_result;
+        let b: BigInt = *from_string(b).from_result;
+        let c: BigInt = *from_string(c).from_result;
+        let actual = modpow(a,b,c);
+        //let _ = *println((a, b, c, actual).format("pow_by_U64({},{},{})={}")).lift;
+        assert_equal("eq", expect, actual.to_string)
+    )
+);
+
+test_gcd: TestCase;
+test_gcd = (
+    make_table_test("test_gcd",
+        [
+            ("5", "2", "1"),
+            ("6", "10", "2"),
+            ("-6", "-10", "2"),
+            ("57", "51", "3")
+        ],
+        |(a, b, expect)|
+        let a: BigInt = *from_string(a).from_result;
+        let b: BigInt = *from_string(b).from_result;
+        let actual = gcd(a,b);
+        //let _ = *println((a, b, actual).format("gcd({},{})={}")).lift;
+        assert_equal("eq", expect, actual.to_string)
+    )
+);
+
+test_jacobi_symbol: TestCase;
+test_jacobi_symbol = (
+    make_table_test("test_jacobi_symbol",
+        [
+            ("1001", "9907", -1),
+            ("19", "45", 1),
+            ("8", "21", -1),
+            ("5", "21", 1),
+            ("40", "21", -1),
+            ("1", "21", 1),
+            ("-1", "21", 1),
+            ("-1", "23", -1),
+            ("-24", "23", -1),
+            ("27", "39", 0)
+        ],
+        |(m, n, expect)|
+        let m: BigInt = *from_string(m).from_result;
+        let n: BigInt = *from_string(n).from_result;
+        let actual = jacobi_symbol(m,n);
+        //let _ = *println((m, n, actual).format("jacobi_symbol({},{})={}")).lift;
+        assert_equal("eq", expect, actual)
+    )
+);
+
+test_probable_prime: TestCase;
+test_probable_prime = (
+    make_test("test_probable_prime") $ |_|
+    let random = Random::init_by_seed(123_U64);
+    let prime_gen = *PrimeGen::make(random, false).lift;
+    let bit_length = 128;
+    let n = *prime_gen.probable_prime(bit_length).lift;
+    let ret = *prime_gen.solovay_strassen(n).lift;
+    assert_equal("solovay_strassen failed", true, ret)
+);
+
+main: IO ();
+main = (
+    [
+        test_pow_by_U64,
+        test_modpow,
+        test_gcd,
+        test_jacobi_symbol,
+        test_probable_prime
+    ].run_test_driver
+);
+

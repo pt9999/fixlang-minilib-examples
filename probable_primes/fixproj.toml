@@ -7,6 +7,14 @@ output = "probable_primes.out"
 opt_level = "separated"
 files = [
     "probable_primes.fix",
+    "bigint_prime.fix",
+]
+
+[build.test]
+opt_level = "separated"
+files = [
+    "tests/test.fix",
+    "tests/bigint_prime_test.fix",
 ]
 
 [[dependencies]]
@@ -23,3 +31,9 @@ path = "../../fixlang-minilib-app"
 name = "minilib-math"
 version = "*"
 path = "../../fixlang-minilib-math"
+
+[[dependencies]]
+name = "minilib-thread"
+version = "*"
+path = "../../fixlang-minilib-thread"
+
