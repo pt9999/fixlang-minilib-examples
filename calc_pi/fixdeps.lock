@@ -66,30 +66,6 @@ version = "0.1.0"
 path = "../../fixlang-minilib-math/../fixlang-minilib-binary"
 
 [[dependencies]]
-name = "minilib-thread"
-version = "0.1.0"
-path = "../../fixlang-minilib-math/../fixlang-minilib-thread"
-
-[[dependencies]]
-name = "minilib-io"
-version = "0.1.0"
-path = "../../fixlang-minilib-math/../fixlang-minilib-thread/../fixlang-minilib-io"
-
-[[dependencies]]
-name = "minilib-collection"
-version = "0.1.0"
-path = "../../fixlang-minilib-math/../fixlang-minilib-thread/../fixlang-minilib-io/../fixlang-minilib-collection"
-
-[[dependencies]]
-name = "asynctask"
-version = "0.2.4"
-path = ".fixlang/deps/asynctask_0.2.4"
-
-[dependencies.git]
-repo = "https://github.com/tttmmmyyyy/fixlang-asynctask.git"
-rev = "78580c9f6a100023b1892129a1b4b683d2514073"
-
-[[dependencies]]
 name = "math"
 version = "0.1.2"
 path = ".fixlang/deps/math_0.1.2"

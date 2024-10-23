@@ -105,11 +105,6 @@ version = "0.1.0"
 path = "../../fixlang-minilib-math"
 
 [[dependencies]]
-name = "minilib-thread"
-version = "0.1.0"
-path = "../../fixlang-minilib-thread"
-
-[[dependencies]]
 name = "math"
 version = "0.1.2"
 path = ".fixlang/deps/math_0.1.2"
@@ -117,3 +112,8 @@ path = ".fixlang/deps/math_0.1.2"
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-math.git"
 rev = "88b953a6cf3bdf9d1dcada069c089edae6bc8d0c"
+
+[[dependencies]]
+name = "minilib-thread"
+version = "0.1.0"
+path = "../../fixlang-minilib-thread"
