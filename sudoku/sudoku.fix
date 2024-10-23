@@ -25,7 +25,7 @@ import AsyncTask;
 import Random;
 import Time;
 
-import Minilib.Common.Common;
+import Minilib.Common.Assert;
 import Minilib.App.Clap;
 import Minilib.Encoding.Xml;
 import Minilib.Common.RandomEx;

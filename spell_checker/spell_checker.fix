@@ -19,7 +19,7 @@ import Hash;
 import HashMap;
 import HashSet;
 
-import Minilib.Common.Common;
+import Minilib.Common.Assert;
 import Minilib.App.Clap;
 import Minilib.Encoding.Binary;
 import Minilib.IO.FileSystem;

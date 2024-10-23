@@ -20,7 +20,7 @@ module Minilib.Math.BigIntPrime;
 import AsyncTask;
 import Random;
 
-import Minilib.Common.Common;
+import Minilib.Common.Assert;
 import Minilib.Math.BigNat;
 import Minilib.Math.BigInt;
 import Minilib.Math.Types;

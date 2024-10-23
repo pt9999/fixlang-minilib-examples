@@ -16,7 +16,7 @@ module Main;
 
 import AsyncTask;
 
-import Minilib.Common.Common;
+import Minilib.Common.Assert;
 import Minilib.App.Clap;
 import Minilib.Collection.Deque;
 import Minilib.Net.Tcp;
