@@ -25,6 +25,7 @@ import AsyncTask;
 import Random;
 import Time;
 
+import Minilib.Common.Common;
 import Minilib.App.Clap;
 import Minilib.Encoding.Xml;
 import Minilib.Common.RandomEx;
@@ -263,9 +264,9 @@ namespace Candidates {
                 let digit = board.get_digit(row, col);
                 if digit.is_none { cand };
                 let digit = digit.as_some.to_I64;
-                eval assert(|_| (digit, (row, col)).format("could not place {} at {}"),
+                assert_lazy(|_| (digit, (row, col)).format("could not place {} at {}"),
                     cand.get_bitvec(row, col).get_bit(digit) == true
-                );
+                ) $ |_|
                 cand.mod_all(row, col, set_bit(digit, false))
             )
         )
@@ -330,7 +331,7 @@ namespace BoardState {
     // 指定したマスに数字を配置する。
     place_digit: I64 -> I64 -> I64 -> BoardState -> BoardState;
     place_digit = |row, col, digit, state| (
-        eval assert(|_| "digit is already set", state.@board.get_digit(row, col).is_none);
+        assert_lazy(|_| "digit is already set", state.@board.get_digit(row, col).is_none) $ |_|
         state.mod_board(set_digit(row, col, some(digit.to_U8)))
              .mod_candidates(mod_all(row, col, set_bit(digit, false)))
              .mod_digit_count(add(1))
@@ -538,7 +539,7 @@ namespace Generator {
     // var_random を用いて配列の要素をランダムに選択する。
     _select_random: Array a -> Generator -> IOFail a;
     _select_random = |array, gen| (
-        eval assert(|_| "array is empty", array.get_size >= 1);
+        assert_lazy(|_| "array is empty", array.get_size >= 1) $ |_|
         let i = *gen._with_random(generate_I64_range(0, array.get_size));
         pure $ array.@(i)
     );
@@ -557,7 +558,7 @@ namespace Generator {
             // 数字があるマスを1つ選択する
             let nonempty_cells = state.@board.get_nonempty_cells.to_array;
             let (row, col) = *gen._select_random(nonempty_cells);
-            eval assert(|_| "should be nonempty", state.@board.get_digit(row, col).is_some);
+            assert_lazy(|_| "should be nonempty", state.@board.get_digit(row, col).is_some) $ |_|
 
             // ランダムに1つ穴を開けた新しい盤面を作成する
             let new_board = state.@board.set_digit(row, col, none());

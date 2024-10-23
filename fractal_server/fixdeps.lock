@@ -2,7 +2,7 @@ proj_file_hash = "a05f5e1cbc2cc9995d4ebff4bb07a8bb"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.1.0"
+version = "0.1.1"
 path = "../../fixlang-minilib-common"
 
 [[dependencies]]

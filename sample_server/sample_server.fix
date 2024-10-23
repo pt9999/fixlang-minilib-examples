@@ -16,6 +16,7 @@ module Main;
 
 import AsyncTask;
 
+import Minilib.Common.Common;
 import Minilib.App.Clap;
 import Minilib.Collection.Deque;
 import Minilib.Net.Tcp;
@@ -128,7 +129,7 @@ namespace ChatRoom {
         room_var.wait_and_lock(
             has_event(id), |room|
             let (event, room) = room.receive_event(id);
-            eval assert(|_|"event.is_some", event.is_some);
+            assert_lazy(|_|"event.is_some", event.is_some) $ |_|
             let _ = *room_var.Var::set(room);
             pure $ event.as_some
         )

@@ -19,6 +19,7 @@ import Hash;
 import HashMap;
 import HashSet;
 
+import Minilib.Common.Common;
 import Minilib.App.Clap;
 import Minilib.Encoding.Binary;
 import Minilib.IO.FileSystem;
@@ -258,7 +259,7 @@ namespace DictCache {
     write_string = |str, buf| (
         let n = str.get_size;
         let bytes = str.get_bytes;
-        eval assert (|_| "invalid bytes", bytes.@(n) == '\0');
+        assert_lazy (|_| "invalid bytes", bytes.@(n) == '\0') $ |_|
         let i = buf.get_size;
         buf.mod_array(|arr|
             loop(
