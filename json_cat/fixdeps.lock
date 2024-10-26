@@ -1,9 +1,13 @@
-proj_file_hash = "275ea64754525342948a61b2c386f85d"
+proj_file_hash = "20316708ea1acc7592b26fce98edb038"
 
 [[dependencies]]
 name = "minilib-common"
 version = "0.1.1"
-path = "../../fixlang-minilib-common"
+path = ".fixlang/deps/minilib-common_0.1.1"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-common.git"
+rev = "dc5748f90c98474905c6fa09e9472b2716100c40"
 
 [[dependencies]]
 name = "character"
@@ -35,7 +39,11 @@ rev = "3fd362bddf4592fef854a2b700836e17c1f5b30b"
 [[dependencies]]
 name = "minilib-app"
 version = "0.1.0"
-path = "../../fixlang-minilib-app"
+path = ".fixlang/deps/minilib-app_0.1.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-app.git"
+rev = "07c67f4641c4df917db5d63fcae810a9b38dfd29"
 
 [[dependencies]]
 name = "hashmap"
@@ -58,19 +66,35 @@ rev = "0e05f132ebc9420759a789fcd9e1afa739769c39"
 [[dependencies]]
 name = "minilib-json"
 version = "0.1.0"
-path = "../../fixlang-minilib-json"
+path = ".fixlang/deps/minilib-json_0.1.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-json.git"
+rev = "1cb6a393aac5051daaceca2e54b138fda5d8fb54"
 
 [[dependencies]]
 name = "minilib-binary"
 version = "0.1.0"
-path = "../../fixlang-minilib-json/../fixlang-minilib-binary"
+path = ".fixlang/deps/minilib-binary_0.1.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-binary.git"
+rev = "be62fe63eddd3cceee37d6df423621648c0a3b61"
 
 [[dependencies]]
 name = "minilib-text"
 version = "0.1.0"
-path = "../../fixlang-minilib-json/../fixlang-minilib-text"
+path = ".fixlang/deps/minilib-text_0.1.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-text.git"
+rev = "eb17306482c2c9ddd7499644c966414cfce6ae40"
 
 [[dependencies]]
 name = "minilib-collection"
 version = "0.1.0"
-path = "../../fixlang-minilib-json/../fixlang-minilib-collection"
+path = ".fixlang/deps/minilib-collection_0.1.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-collection.git"
+rev = "47a67ca509f79d88fe744139902ab9a5fc38519c"
