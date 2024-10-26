@@ -12,26 +12,26 @@ files = [
 [[dependencies]]
 name = "minilib-common"
 version = "*"
-path = "../../fixlang-minilib-common"
-# git = { url = "https://github.com/pt9999/fixlang-minilib-common.git" }
+# path = "../../fixlang-minilib-common"
+git = { url = "https://github.com/pt9999/fixlang-minilib-common.git" }
 
 [[dependencies]]
 name = "minilib-app"
 version = "*"
-path = "../../fixlang-minilib-app"
-# git = { url = "https://github.com/pt9999/fixlang-minilib-app.git" }
+# path = "../../fixlang-minilib-app"
+git = { url = "https://github.com/pt9999/fixlang-minilib-app.git" }
 
 [[dependencies]]
 name = "minilib-binary"
 version = "*"
-path = "../../fixlang-minilib-binary"
-# git = { url = "https://github.com/pt9999/fixlang-minilib-binary.git" }
+# path = "../../fixlang-minilib-binary"
+git = { url = "https://github.com/pt9999/fixlang-minilib-binary.git" }
 
 [[dependencies]]
 name = "minilib-io"
 version = "*"
-path = "../../fixlang-minilib-io"
-# git = { url = "https://github.com/pt9999/fixlang-minilib-io.git" }
+# path = "../../fixlang-minilib-io"
+git = { url = "https://github.com/pt9999/fixlang-minilib-io.git" }
 
 [[dependencies]]
 name = "character"
