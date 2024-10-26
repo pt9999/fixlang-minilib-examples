@@ -14,36 +14,43 @@ dynamic_links = ["png"]
 name = "minilib-common"
 version = "*"
 path = "../../fixlang-minilib-common"
+# git = { url = "https://github.com/pt9999/fixlang-minilib-common.git" }
 
 [[dependencies]]
 name = "minilib-app"
 version = "*"
 path = "../../fixlang-minilib-app"
+# git = { url = "https://github.com/pt9999/fixlang-minilib-app.git" }
 
 [[dependencies]]
 name = "minilib-net"
 version = "*"
 path = "../../fixlang-minilib-net"
+# git = { url = "https://github.com/pt9999/fixlang-minilib-net.git" }
 
 [[dependencies]]
 name = "minilib-media"
 version = "*"
 path = "../../fixlang-minilib-media"
+# git = { url = "https://github.com/pt9999/fixlang-minilib-media.git" }
 
 [[dependencies]]
 name = "minilib-math"
 version = "*"
 path = "../../fixlang-minilib-math"
+# git = { url = "https://github.com/pt9999/fixlang-minilib-math.git" }
 
 [[dependencies]]
 name = "minilib-io"
 version = "*"
 path = "../../fixlang-minilib-io"
+# git = { url = "https://github.com/pt9999/fixlang-minilib-io.git" }
 
 [[dependencies]]
 name = "minilib-thread"
 version = "*"
 path = "../../fixlang-minilib-thread"
+# git = { url = "https://github.com/pt9999/fixlang-minilib-thread.git" }
 
 [[dependencies]]
 name = "asynctask"
