@@ -15,7 +15,7 @@ update-deps:
 
 publish-deps:
 	git add */fixdeps.lock
-	git commit -m 'update deps'
+	git diff-index --quiet --cached HEAD || git commit -m 'update deps'
 	git push
 
 update-deps-publish: update-deps publish-deps
