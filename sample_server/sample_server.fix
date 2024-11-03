@@ -148,9 +148,9 @@ chat = |socket, addr, room| (
     let bufsock = *bufsock.flush;
     let input_task = *AsyncIOTask::make(chat_input_task(bufsock, member, room)).lift;
     let send_message_task = *AsyncIOTask::make(chat_send_message_task(bufsock, member, room)).lift;
-    let _ = input_task.get;
-    let _ = send_message_task.get;
-    let _ = *room.mod(remove_member(member_id)).lift;    // TODO: use finally
+    input_task.get.lift;;
+    send_message_task.get.lift;;
+    room.mod(remove_member(member_id)).lift;;    // TODO: use finally
     pure()
 );
 
