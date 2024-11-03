@@ -1,5 +1,15 @@
-# Example programs for fixlang_minilib
+# Sample programs for fixlang_minilib
 
+This repository contains the source code for sample programs using [fixlang_minilib](https://github.com/pt9999/fixlang_minilib).
+
+To build all programs, run the `make all` command.
+The executable of the program is generated in each subdirectory.
+The file extension of the executable is `.out`.
+For example, the executable file name of `json_cat` is `json_cat.out`.
+
+To clean up all programs (and intermediate files), run the `make clean` command.
+
+The details of each sample program are explained below.
 
 ## json_cat
 
@@ -146,6 +156,13 @@ An HTTP server that renders Mandelbrot fractal images.
 
 Start the server and open `http://127.0.0.1:8080/` in your favorite browser.
 To stop the server, type Ctrl+C.
+
+This program uses `libpng` for sending image data to the browser.
+So the `libpng` library is required.
+To install the `libpng` library in Ubuntu-22.04, run the following command.
+```bash
+$ sudo apt install libpng-dev
+```
 
 ```
 $ examples/fractal_server.out --help
