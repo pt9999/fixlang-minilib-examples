@@ -92,12 +92,12 @@ rev = "ea7ee41420c8531786d20ccb6ca93f23b0a828c9"
 
 [[dependencies]]
 name = "minilib-thread"
-version = "0.1.0"
-path = ".fixlang/deps/minilib-thread_0.1.0"
+version = "0.1.1"
+path = ".fixlang/deps/minilib-thread_0.1.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-thread.git"
-rev = "5f3f8822a0c558f15d2c00fe7a0740708774a216"
+rev = "d9788b9460f3a664feb668b66a188934cb06d3a7"
 
 [[dependencies]]
 name = "minilib-io"

@@ -65,12 +65,12 @@ rev = "0e05f132ebc9420759a789fcd9e1afa739769c39"
 
 [[dependencies]]
 name = "minilib-net"
-version = "0.1.1"
-path = ".fixlang/deps/minilib-net_0.1.1"
+version = "0.1.2"
+path = ".fixlang/deps/minilib-net_0.1.2"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-net.git"
-rev = "a01fd88c9aa7c998c600faa8edd2a610d290d0b0"
+rev = "6c93d1c9264b89801e661e12d57f74be99432364"
 
 [[dependencies]]
 name = "minilib-io"
@@ -133,7 +133,7 @@ path = ".fixlang/deps/minilib-media_0.1.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-media.git"
-rev = "035063c528a718ed6f4ef1190691218d984c66cc"
+rev = "34a5fc34cc877951069b33831adf9525a036b7ee"
 
 [[dependencies]]
 name = "math"
@@ -155,9 +155,9 @@ rev = "a3612578bb9820dd311350932e12ab7d6d9d8b4e"
 
 [[dependencies]]
 name = "minilib-thread"
-version = "0.1.0"
-path = ".fixlang/deps/minilib-thread_0.1.0"
+version = "0.1.1"
+path = ".fixlang/deps/minilib-thread_0.1.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-thread.git"
-rev = "5f3f8822a0c558f15d2c00fe7a0740708774a216"
+rev = "d9788b9460f3a664feb668b66a188934cb06d3a7"
