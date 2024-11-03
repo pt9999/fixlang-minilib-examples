@@ -65,12 +65,12 @@ rev = "0e05f132ebc9420759a789fcd9e1afa739769c39"
 
 [[dependencies]]
 name = "minilib-net"
-version = "0.1.2"
-path = ".fixlang/deps/minilib-net_0.1.2"
+version = "0.1.3"
+path = ".fixlang/deps/minilib-net_0.1.3"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-net.git"
-rev = "6c93d1c9264b89801e661e12d57f74be99432364"
+rev = "e8fedf88573b2046c813f02c1a0968b3087ca6ea"
 
 [[dependencies]]
 name = "minilib-io"
