@@ -97,7 +97,7 @@ path = ".fixlang/deps/minilib-media_0.1.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-media.git"
-rev = "34a5fc34cc877951069b33831adf9525a036b7ee"
+rev = "c29f51de7686992e71c695dffd285b59cc2fd0a4"
 
 [[dependencies]]
 name = "minilib-io"
@@ -106,7 +106,7 @@ path = ".fixlang/deps/minilib-io_0.1.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "da7a396dbccccb6647b295a96c1523842cc6ced1"
+rev = "0973134abf7b35dc66784856fbf973bb703ad38d"
 
 [[dependencies]]
 name = "minilib-collection"
