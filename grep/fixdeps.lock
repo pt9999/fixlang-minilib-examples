@@ -1,4 +1,4 @@
-proj_file_hash = "12b092361ae561f2717d52a7dc107e2c"
+proj_file_hash = "fc00950ab3a3d279ce051a4d67317d69"
 
 [[dependencies]]
 name = "minilib-common"
@@ -64,19 +64,10 @@ repo = "https://github.com/tttmmmyyyy/fixlang-hash.git"
 rev = "0e05f132ebc9420759a789fcd9e1afa739769c39"
 
 [[dependencies]]
-name = "minilib-regexp"
+name = "regexp"
 version = "0.1.2"
-path = ".fixlang/deps/minilib-regexp_0.1.2"
+path = ".fixlang/deps/regexp_0.1.2"
 
 [dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-regexp.git"
-rev = "a99e3b04c2a585d885a86debdd234e5363d2a93b"
-
-[[dependencies]]
-name = "minilib-text"
-version = "0.1.2"
-path = ".fixlang/deps/minilib-text_0.1.2"
-
-[dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-text.git"
-rev = "ea712004ef50d5e38490b929ed5b88220bdf03e2"
+repo = "https://github.com/tttmmmyyyy/fixlang-regexp.git"
+rev = "e7ff0f2a292a7ff385d2f93556dc8c9078a54dc2"

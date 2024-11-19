@@ -21,8 +21,9 @@ version = "*"
 # path = "../../fixlang-minilib-app"
 git = { url = "https://github.com/pt9999/fixlang-minilib-app.git" }
 
+
+
 [[dependencies]]
-name = "minilib-regexp"
+name = "regexp"
 version = "*"
-# path = "../../fixlang-minilib-regexp"
-git = { url = "https://github.com/pt9999/fixlang-minilib-regexp.git" }
+git = { url = "https://github.com/tttmmmyyyy/fixlang-regexp.git" }
