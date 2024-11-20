@@ -2,6 +2,12 @@
 
 This repository contains the source code for sample programs using [fixlang_minilib](https://github.com/pt9999/fixlang_minilib).
 
+Some programs use prerequisite libraries.
+To install the prerequisite libraries in Ubuntu-22.04, run the following command.
+```bash
+$ sudo apt install libpng-dev
+```
+
 To build all programs, run the `make all` command.
 The executable of the program is generated in each subdirectory.
 The file extension of the executable is `.out`.
