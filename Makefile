@@ -1,25 +1,3 @@
-all:
-	set -e && for dir in $(EXAMPLES); do \
-		[ ! -d $$dir ] || (echo $$dir && cd $$dir && fix build); \
-	done
-
-clean:
-	set -e && for dir in $(EXAMPLES); do \
-		[ ! -d $$dir ] || (echo $$dir && cd $$dir && fix clean && rm -rf *.out); \
-	done
-
-update-deps:
-	set -e && for dir in $(EXAMPLES); do \
-		[ ! -d $$dir ] || (echo $$dir && cd $$dir && fix deps update); \
-	done
-
-publish-deps:
-	git add $(EXAMPLES:%=%/fixdeps.lock)
-	git diff-index --quiet --cached HEAD || git commit -m 'update deps'
-	git push
-
-update-deps-publish: update-deps publish-deps
-
 EXAMPLES = \
 	calc_pi \
 	fractal_server \
@@ -31,3 +9,29 @@ EXAMPLES = \
 	sample_server \
 	spell_checker \
 	sudoku
+
+SUBDIR_MAKEFILE = $$(pwd)/subdir.make
+
+.PHONY: all build clean publish
+.SUFFIXES: .build .clean .publish
+
+all: build
+
+build: $(EXAMPLES:%=%.build)
+clean: $(EXAMPLES:%=%.clean)
+publish: $(EXAMPLES:%=%.publish) publish-deps
+
+%.build:
+	make -C $* -f $(SUBDIR_MAKEFILE) build
+
+%.clean:
+	make -C $* -f $(SUBDIR_MAKEFILE) clean
+
+%.publish: 
+	make -C $* -f $(SUBDIR_MAKEFILE) clean update-deps build
+
+.PHONY: publish-deps
+publish-deps:
+	git add $(EXAMPLES:%=%/fixdeps.lock)
+	git diff-index --quiet --cached HEAD || git commit -m 'update deps'
+	git push
