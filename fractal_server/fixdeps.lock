@@ -2,12 +2,12 @@ proj_file_hash = "2b059304744cf6c5f2378dff0fc044ff"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.1.4"
-path = ".fixlang/deps/minilib-common_0.1.4"
+version = "0.1.5"
+path = ".fixlang/deps/minilib-common_0.1.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "f7046c1b0a7b83b6975617de62f9c022a2256506"
+rev = "6828c6fb49511640162a672d55730bf6c93a32e8"
 
 [[dependencies]]
 name = "character"
@@ -74,12 +74,12 @@ rev = "d3c7dd9b487761a725ecb087d3773a593496e9ad"
 
 [[dependencies]]
 name = "minilib-io"
-version = "0.2.5"
-path = ".fixlang/deps/minilib-io_0.2.5"
+version = "0.2.6"
+path = ".fixlang/deps/minilib-io_0.2.6"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "62ac0db57026a66ccb7600d373c5c6abbcbbf96c"
+rev = "6b1a05ced77819f1bb9f574bbd4cfda26d78598f"
 
 [[dependencies]]
 name = "minilib-binary"
@@ -127,13 +127,13 @@ repo = "https://github.com/pt9999/fixlang-minilib-text.git"
 rev = "f15fe5af14563c5408ff14c79d7b634f05e80cb0"
 
 [[dependencies]]
-name = "minilib-media"
-version = "0.1.6"
-path = ".fixlang/deps/minilib-media_0.1.6"
+name = "minilib-math"
+version = "0.1.5"
+path = ".fixlang/deps/minilib-math_0.1.5"
 
 [dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-media.git"
-rev = "5232bde62a32d6168a0bce4a65b037fdfddb4a85"
+repo = "https://github.com/pt9999/fixlang-minilib-math.git"
+rev = "2496ff8ac88bad6f6fffb2637436e52984462972"
 
 [[dependencies]]
 name = "math"
@@ -145,15 +145,6 @@ repo = "https://github.com/tttmmmyyyy/fixlang-math.git"
 rev = "6b1c3810d49d0291c2a800f783be38138cf4381d"
 
 [[dependencies]]
-name = "minilib-math"
-version = "0.1.5"
-path = ".fixlang/deps/minilib-math_0.1.5"
-
-[dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-math.git"
-rev = "2496ff8ac88bad6f6fffb2637436e52984462972"
-
-[[dependencies]]
 name = "minilib-thread"
 version = "0.1.5"
 path = ".fixlang/deps/minilib-thread_0.1.5"
@@ -161,3 +152,12 @@ path = ".fixlang/deps/minilib-thread_0.1.5"
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-thread.git"
 rev = "ca159fd4c7e68ac8a164de0587fef838df5a421e"
+
+[[dependencies]]
+name = "minilib-media"
+version = "0.2.0"
+path = ".fixlang/deps/minilib-media_0.2.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-media.git"
+rev = "f57c8019de5aff1178007e29787e1d03967c7ee2"
