@@ -26,3 +26,9 @@ name = "minilib-net"
 version = "*"
 # path = "../../fixlang-minilib-net"
 git = { url = "https://github.com/pt9999/fixlang-minilib-net.git" }
+
+
+[[dependencies]]
+name = "minilib-collection"
+version = "*"
+git = { url = "https://github.com/pt9999/fixlang-minilib-collection.git" }
