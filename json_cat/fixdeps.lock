@@ -2,12 +2,12 @@ proj_file_hash = "20316708ea1acc7592b26fce98edb038"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.1.4"
-path = ".fixlang/deps/minilib-common_0.1.4"
+version = "0.1.5"
+path = ".fixlang/deps/minilib-common_0.1.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "f7046c1b0a7b83b6975617de62f9c022a2256506"
+rev = "6828c6fb49511640162a672d55730bf6c93a32e8"
 
 [[dependencies]]
 name = "character"
@@ -43,7 +43,7 @@ path = ".fixlang/deps/minilib-app_0.1.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "ae7a0dd56dd04c3f881fc7d8197240b79a53e223"
+rev = "e09ea249ff2015d1452d4a54698ce36d9fe0f347"
 
 [[dependencies]]
 name = "hashmap"
@@ -70,7 +70,7 @@ path = ".fixlang/deps/minilib-json_0.1.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-json.git"
-rev = "8fe93a9f2dc9d225e7f5c45740680f57802e4152"
+rev = "2fe3bebd9bbd043cea74a2e4d11fc991902848ab"
 
 [[dependencies]]
 name = "minilib-binary"
@@ -79,7 +79,7 @@ path = ".fixlang/deps/minilib-binary_0.1.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-binary.git"
-rev = "55f3005a8ec85a0d4252ce52a0fb44c4a0c31349"
+rev = "a71138c2b1663f8aeba60c92b1f746a301443aad"
 
 [[dependencies]]
 name = "minilib-text"
@@ -88,7 +88,7 @@ path = ".fixlang/deps/minilib-text_0.1.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-text.git"
-rev = "f15fe5af14563c5408ff14c79d7b634f05e80cb0"
+rev = "438e214426e173f60cbd5d2608ba12d04607e834"
 
 [[dependencies]]
 name = "minilib-collection"
@@ -97,4 +97,4 @@ path = ".fixlang/deps/minilib-collection_0.1.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-collection.git"
-rev = "0f0d5305473c4de87e62fd11acd90dad4403583f"
+rev = "02e54ad8c98c21978ea4eee03468ea5326a22b9f"
