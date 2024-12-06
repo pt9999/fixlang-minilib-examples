@@ -64,13 +64,22 @@ repo = "https://github.com/tttmmmyyyy/fixlang-hash.git"
 rev = "4b2f01c2d7309447fe7cd68a8d105ae86e2bde97"
 
 [[dependencies]]
+name = "minilib-collection"
+version = "0.1.4"
+path = ".fixlang/deps/minilib-collection_0.1.4"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-collection.git"
+rev = "02e54ad8c98c21978ea4eee03468ea5326a22b9f"
+
+[[dependencies]]
 name = "minilib-net"
-version = "0.1.8"
-path = ".fixlang/deps/minilib-net_0.1.8"
+version = "0.2.1"
+path = ".fixlang/deps/minilib-net_0.2.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-net.git"
-rev = "0d36947e49e24acd27c6d3a636f697989e4f9df3"
+rev = "cdf13c57a6d8213acbb4140999f30d998d5e15ea"
 
 [[dependencies]]
 name = "minilib-xml"
@@ -116,12 +125,3 @@ path = ".fixlang/deps/asynctask_1.0.0"
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-asynctask.git"
 rev = "6b36519aade839ecb28ec236bc4cabe37416f398"
-
-[[dependencies]]
-name = "minilib-collection"
-version = "0.1.4"
-path = ".fixlang/deps/minilib-collection_0.1.4"
-
-[dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-collection.git"
-rev = "02e54ad8c98c21978ea4eee03468ea5326a22b9f"
