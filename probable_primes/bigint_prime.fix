@@ -91,8 +91,9 @@ namespace PrimeGen {
     // `prime_gen.probable_prime(bit_length)` returns a probable prime number with specified bit length.
     probable_prime: I64 -> PrimeGen -> IO BigInt;
     probable_prime = |bit_length, prime_gen| (
-        let end = pow_by_U64(BigInt::two, bit_length.to_U64);
-        let (begin, _) = end.divmod_by_two;
+        assert(|_| "invalid bit_length", bit_length >= 1);;
+        let begin: BigInt = one.shift_left((bit_length - 1).to_U64);
+        let end: BigInt = one.shift_left(bit_length.to_U64);
         let n = *prime_gen.generate_bigint_range(begin, end);
         let n = *prime_gen.next_probable_prime(n);
         if begin <= n && n < end {
@@ -153,73 +154,27 @@ namespace PrimeGen {
         pure $ some(n)
     );
 
+    /*
     // Generates random BigInt `r` of specified bit length.
     generate_bigint:  I64 -> PrimeGen -> IO BigInt;
     generate_bigint = |bit_length, prime_gen| (
-        assert_lazy(|_| "invalid bit_length", bit_length >= 0) $ |_|
-        let end = pow_by_U64(BigInt::two, bit_length.to_U64);
-        let (begin, _) = end.divmod_by_two;
-        prime_gen.generate_bigint_range(begin, end)
-    );
-
-    _generate_u64: PrimeGen -> IO U64;
-    _generate_u64 = |prime_gen| (
         prime_gen.@rand_var.lock(|random|
-            let (random, u64) = random.generate_U64;
-            let _ = *prime_gen.@rand_var.Var::set(random);
-            pure $ u64
+            let (random, n) = random.generate_bigint(bit_length);
+            prime_gen.@rand_var.Var::set(random);;
+            pure $ n
         )
     );
+    */
 
     // Generates random BigInt `r` such that `begin <= r && r < end`.
     generate_bigint_range: BigInt -> BigInt -> PrimeGen -> IO BigInt;
     generate_bigint_range = |begin, end, prime_gen| (
-        if begin > end {
-            prime_gen.generate_bigint_range(end, begin)      // swap range and retry
-        };
-        let n = end - begin;
-        assert_lazy(|_| "invalid range", n > zero) $ |_|
-        let size = n.@nat.get_size;
-        let nat = *loop_m(
-            ([], 0), |(nat, i)|
-            let u64 = *prime_gen._generate_u64;
-            if i == size - 1 {
-                let m = n.@nat.@(size - 1).to_U64;
-                // choose 0..m uniformly
-                let u64 = u64 / (U64::maximum / (m + 1_U64));
-                if u64 > m {
-                    continue_m $ (nat, i)     // try again
-                };
-                let nat = nat.push_back(u64.to_U32);
-                break_m $ nat
-            };
-            let (_, rem) = BigNat::_divmod_base(u64);
-            let nat = nat.push_back(rem.to_U32);
-            continue_m $ (nat, i + 1)
-        );
-        let r = BigInt::make(1, nat);
-        if r >= n {
-            prime_gen.generate_bigint_range(begin, end)      // try again
-        };
-        let r = begin + r;
-        pure $ r
-    );
-
-    // Calculates `a^n`.
-    pow_by_U64: BigInt -> U64 -> BigInt;
-    pow_by_U64 = |a, n| (
-        loop(
-            (BigInt::from_I64(1), a, n), |(prod, a, n)|
-            if n == 0_U64 {
-                break $ prod
-            };
-            let prod = if n.bit_and(1_U64) != 0_U64 {
-                prod * a
-            } else { prod };
-            continue $ (prod, a*a, n.shift_right(1_U64))
+        prime_gen.@rand_var.lock(|random|
+            let (random, n) = random.generate_bigint_range(begin, end);
+            prime_gen.@rand_var.Var::set(random);;
+            pure $ n
         )
     );
-
 
     // Performes divisibility check against small primes.
     check_for_small_primes: BigInt -> Bool;
@@ -340,6 +295,7 @@ namespace PrimeGen {
 }
 
 // Calculates `a^n mod m`.
+// TODO: move to `Minilib.Math.BigInt`, or use `Minilib.Math.Modular`
 modpow: BigInt -> BigInt -> BigInt -> BigInt;
 modpow = |a, n, m| (
     loop(
@@ -357,6 +313,7 @@ modpow = |a, n, m| (
 );
 
 // `gcd(m,n)` returns the greatest common divisor of `abs(m)` and `abs(n)`.
+// TODO: move to `Minilib.Math.BigInt`, or use `Minilib.Math.Euclid`
 gcd: BigInt -> BigInt -> BigInt;
 gcd = |m, n| (
     let m = m.abs;
