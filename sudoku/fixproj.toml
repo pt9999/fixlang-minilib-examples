@@ -47,3 +47,8 @@ git = { url = "https://github.com/tttmmmyyyy/fixlang-random.git" }
 name = "time"
 version = "*"
 git = { url = "https://github.com/tttmmmyyyy/fixlang-time.git" }
+
+[[dependencies]]
+name = "minilib-random"
+version = "0.1.2"
+git = { url = "https://github.com/pt9999/fixlang-minilib-random.git" }
