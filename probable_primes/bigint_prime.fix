@@ -25,6 +25,7 @@ import Minilib.Math.BigNat;
 import Minilib.Math.BigInt;
 import Minilib.Math.Types;
 import Minilib.Monad.FunctorM;
+import Minilib.Monad.State;
 import Minilib.Text.StringEx;
 import Minilib.Thread.Future;
 import Minilib.Thread.TaskPool;
@@ -113,7 +114,7 @@ namespace PrimeGen {
             let _ = *prime_gen._progress("M");
             prime_gen.next_probable_prime(n + one)
         };
-        //let (ret2, random) = solovay_strassen(n, random);
+        //let ret2 = *solovay_strassen(n);
         //eval if !ret2 { debug_eprintln("miller_rabin==true && solovay_strassen==false !!") } else { () };
         let _ = *prime_gen._progress("!\n");
         pure $ n
@@ -154,23 +155,11 @@ namespace PrimeGen {
         pure $ some(n)
     );
 
-    /*
-    // Generates random BigInt `r` of specified bit length.
-    generate_bigint:  I64 -> PrimeGen -> IO BigInt;
-    generate_bigint = |bit_length, prime_gen| (
-        prime_gen.@rand_var.lock(|random|
-            let (random, n) = random.generate_bigint(bit_length);
-            prime_gen.@rand_var.Var::set(random);;
-            pure $ n
-        )
-    );
-    */
-
     // Generates random BigInt `r` such that `begin <= r && r < end`.
     generate_bigint_range: BigInt -> BigInt -> PrimeGen -> IO BigInt;
     generate_bigint_range = |begin, end, prime_gen| (
         prime_gen.@rand_var.lock(|random|
-            let (random, n) = random.generate_bigint_range(begin, end);
+            let (random, n) = run_state(random) $ generate_bigint_range(begin, end);
             prime_gen.@rand_var.Var::set(random);;
             pure $ n
         )
