@@ -7,7 +7,7 @@ import Minilib.App.Clap;
 import Minilib.IO.Path;
 import Minilib.Media.Image;
 import Minilib.Media.Png;
-import Minilib.Monad.FunctorM;
+import Minilib.Trait.Traversable;
 import Minilib.Math.Complex;
 import Minilib.Net.HttpServer;
 import Minilib.Net.Request;

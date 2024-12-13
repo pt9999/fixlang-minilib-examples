@@ -3,7 +3,7 @@ module Main;
 import RegExp;
 
 import Minilib.App.Clap;
-import Minilib.Monad.FunctorM;
+import Minilib.Trait.Traversable;
 import Minilib.Text.StringEx;
 
 process_file: RegExp -> IOHandle -> Option String -> IOFail ();
@@ -35,8 +35,8 @@ process_files = |regexp, input_files| (
     input_files.to_iter.foreach_m(
         |input_file|
         let filename = if input_files.get_size >= 2 {
-            some(input_file) 
-        } else { 
+            some(input_file)
+        } else {
             none()
         };
         with_file(Path::parse(input_file).as_some, "r", |input_fh|
