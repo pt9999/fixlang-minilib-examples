@@ -173,9 +173,9 @@ rev = "8b19000fae4e33aa674613366089b46819b10afb"
 
 [[dependencies]]
 name = "minilib-monad"
-version = "0.3.1"
-path = ".fixlang/deps/minilib-monad_0.3.1"
+version = "0.3.2"
+path = ".fixlang/deps/minilib-monad_0.3.2"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-monad.git"
-rev = "7fe265f372b0d73a58c9dd16603672bdcb3c119c"
+rev = "8edf7df712f31bbbe19c40772542853e734b80bf"
