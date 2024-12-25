@@ -56,12 +56,12 @@ rev = "0df92cf1c3ffc148d658c1a554c94105aef13520"
 
 [[dependencies]]
 name = "minilib-math"
-version = "0.2.2"
-path = ".fixlang/deps/minilib-math_0.2.2"
+version = "0.2.3"
+path = ".fixlang/deps/minilib-math_0.2.3"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-math.git"
-rev = "3fa6a33e52ec40169e2558dac73ed1ee802a073f"
+rev = "fb47e99af7c62451ee7aefaee87736eef8e93b5a"
 
 [[dependencies]]
 name = "minilib-binary"
@@ -83,12 +83,12 @@ rev = "6b1c3810d49d0291c2a800f783be38138cf4381d"
 
 [[dependencies]]
 name = "minilib-random"
-version = "0.1.5"
-path = ".fixlang/deps/minilib-random_0.1.5"
+version = "0.3.5"
+path = ".fixlang/deps/minilib-random_0.3.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-random.git"
-rev = "8b19000fae4e33aa674613366089b46819b10afb"
+rev = "1489c27f53f24a69e5778967f794eb17ab6cad92"
 
 [[dependencies]]
 name = "random"
