@@ -110,12 +110,12 @@ rev = "86ec8949cd8fc6eaeb7008d722d061f466892383"
 
 [[dependencies]]
 name = "minilib-math"
-version = "0.2.3"
-path = ".fixlang/deps/minilib-math_0.2.3"
+version = "0.3.0"
+path = ".fixlang/deps/minilib-math_0.3.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-math.git"
-rev = "fb47e99af7c62451ee7aefaee87736eef8e93b5a"
+rev = "dd8218cf22375ddb9769215dbebc509b8eeb6218"
 
 [[dependencies]]
 name = "math"
