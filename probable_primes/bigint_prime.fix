@@ -168,7 +168,7 @@ namespace PrimeGen {
     // Performes divisibility check against small primes.
     check_for_small_primes: BigInt -> Bool;
     check_for_small_primes = |n| (
-        let (_, rem) = BigInt::divmod(n, BigInt::from_I64(2*3*5*7));
+        let (_, rem) = divmod(n, BigInt::from_I64(2*3*5*7));
         let rem = rem.to_I64;
         if rem % 2 == 0 || rem % 3 == 0 || rem % 5 == 0 || rem % 7 == 0 {
             // `n` is surely composite
@@ -209,7 +209,7 @@ namespace PrimeGen {
         let n_minus_one = n - one;
         let (s, d) = loop(
             (0, n_minus_one), |(s, d)|
-            let (quo, rem) = BigInt::divmod(d, BigInt::two);
+            let (quo, rem) = divmod(d, BigInt::two);
             if rem.to_I64 != 0 {
                 break $ (s, d)
             };
