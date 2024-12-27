@@ -1,13 +1,13 @@
 proj_file_hash = "fc00950ab3a3d279ce051a4d67317d69"
 
 [[dependencies]]
-name = "minilib-app"
-version = "0.1.5"
-path = ".fixlang/deps/minilib-app_0.1.5"
+name = "regexp"
+version = "1.0.0"
+path = ".fixlang/deps/regexp_1.0.0"
 
 [dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "e4a42329d361e53e7a81a40be8a66f5b6daa83b0"
+repo = "https://github.com/tttmmmyyyy/fixlang-regexp.git"
+rev = "6a2e024a7b93a444bb1cc580438013d0fbd52668"
 
 [[dependencies]]
 name = "hashmap"
@@ -28,15 +28,6 @@ repo = "https://github.com/tttmmmyyyy/fixlang-hash.git"
 rev = "4b2f01c2d7309447fe7cd68a8d105ae86e2bde97"
 
 [[dependencies]]
-name = "minilib-common"
-version = "0.3.0"
-path = ".fixlang/deps/minilib-common_0.3.0"
-
-[dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "e9ab46a77d52cc5f6177c6dbe0fed8ebfa5ac73d"
-
-[[dependencies]]
 name = "character"
 version = "1.0.0"
 path = ".fixlang/deps/character_1.0.0"
@@ -46,6 +37,24 @@ repo = "https://github.com/tttmmmyyyy/fixlang-character.git"
 rev = "13e128d2b87a729c4e73d986994a5cedcf3e8f49"
 
 [[dependencies]]
+name = "minilib-app"
+version = "0.1.6"
+path = ".fixlang/deps/minilib-app_0.1.6"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-app.git"
+rev = "64f5c3430d8fd217e0f45ac70c1dcd9add6ba7d2"
+
+[[dependencies]]
+name = "minilib-common"
+version = "0.3.1"
+path = ".fixlang/deps/minilib-common_0.3.1"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-common.git"
+rev = "6723416967dda67aecf68c872c824dcec6878e2b"
+
+[[dependencies]]
 name = "time"
 version = "1.0.0"
 path = ".fixlang/deps/time_1.0.0"
@@ -53,12 +62,3 @@ path = ".fixlang/deps/time_1.0.0"
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-time.git"
 rev = "0df92cf1c3ffc148d658c1a554c94105aef13520"
-
-[[dependencies]]
-name = "regexp"
-version = "1.0.0"
-path = ".fixlang/deps/regexp_1.0.0"
-
-[dependencies.git]
-repo = "https://github.com/tttmmmyyyy/fixlang-regexp.git"
-rev = "6a2e024a7b93a444bb1cc580438013d0fbd52668"
