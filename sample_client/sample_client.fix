@@ -21,7 +21,7 @@ namespace URL {
             (str, "")
         };
         let pos = pos.as_some;
-        (str.substring(0, pos), str.substring(pos + delim.get_size, str.get_size))
+        (str.get_sub(0, pos), str.get_sub(pos + delim.get_size, str.get_size))
     );
 
     parse: String -> Result ErrMsg URL;
