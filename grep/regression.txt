@@ -1,0 +1,9 @@
+    let prefix = match filename {
+        let line = *read_line(input_fh);
+        let line = line.strip_last_newlines;
+        let res = regexp.match_one(line);
+        let filename = if input_files.get_size >= 2 {
+        let matches = *command.get_matches;
+        let pattern = matches.get_one("PATTERN").as_some;
+        let input_files = matches.get_many("FILES").as_some_or([]);
+        let regexp = *RegExp::compile(pattern, "").from_result;

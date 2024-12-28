@@ -35,3 +35,10 @@ publish-deps:
 	git add $(EXAMPLES:%=%/fixdeps.lock)
 	git diff-index --quiet --cached HEAD || git commit -m 'update deps'
 	git push
+
+regression-test:
+	(cd calc_pi && bash ./regression.sh)
+	(cd grep && bash ./regression.sh)
+	(cd json_cat && bash ./regression.sh)
+	(cd probable_primes && bash ./regression.sh)
+	(cd sudoku && bash ./regression.sh)

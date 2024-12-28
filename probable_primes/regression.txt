@@ -1,0 +1,5 @@
+This program generates probable primes of 256 bit to 256 bit.
+It may take several minutes. Please be patient.
+
+Searching a probable prime of 256 bits...
+74711684656080109749370310969696826893036582470942541119922501467529847758171
