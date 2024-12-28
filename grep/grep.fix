@@ -17,7 +17,7 @@ process_file = |regexp, input_fh, filename| (
         if line == "" {
             break_m $ ()
         };
-        let line = line.strip_spaces;
+        let line = line.strip_last_newlines;
         let res = regexp.match_one(line);
         if res.is_err {
             continue_m $ ()
