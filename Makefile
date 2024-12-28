@@ -19,7 +19,7 @@ all: build
 
 build: $(EXAMPLES:%=%.build)
 clean: $(EXAMPLES:%=%.clean)
-publish: $(EXAMPLES:%=%.publish) publish-deps
+publish: $(EXAMPLES:%=%.publish) regression-test publish-deps
 
 %.build:
 	make -C $* -f $(SUBDIR_MAKEFILE) build
