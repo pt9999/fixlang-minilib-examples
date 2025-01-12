@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [build]
 output = "sample_http_server.out"
-opt_level = "separated"
+opt_level = "basic"
 files = [
     "sample_http_server.fix",
 ]

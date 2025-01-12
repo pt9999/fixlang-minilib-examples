@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [build]
 output = "fractal_server.out"
-opt_level = "separated"
+opt_level = "basic"
 files = [
     "fractal_server.fix",
 ]

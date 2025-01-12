@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [build]
 output = "json_cat.out"
-opt_level = "separated"
+opt_level = "basic"
 files = [
     "json_cat.fix",
 ]

@@ -4,14 +4,14 @@ version = "0.1.0"
 
 [build]
 output = "probable_primes.out"
-opt_level = "separated"
+opt_level = "basic"
 files = [
     "probable_primes.fix",
     "bigint_prime.fix",
 ]
 
 [build.test]
-opt_level = "separated"
+opt_level = "basic"
 files = [
     "tests/test.fix",
     "tests/bigint_prime_test.fix",

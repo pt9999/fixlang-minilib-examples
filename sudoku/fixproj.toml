@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [build]
 output = "sudoku.out"
-opt_level = "separated"
+opt_level = "basic"
 files = [
     "sudoku.fix",
 ]
