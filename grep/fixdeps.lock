@@ -38,12 +38,12 @@ rev = "13e128d2b87a729c4e73d986994a5cedcf3e8f49"
 
 [[dependencies]]
 name = "minilib-app"
-version = "0.1.7"
-path = ".fixlang/deps/minilib-app_0.1.7"
+version = "0.1.8"
+path = ".fixlang/deps/minilib-app_0.1.8"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "12a5f01b504b7fb137dea280c510915799a5a846"
+rev = "5787987c0d8cc7861e0783fe8d3f55b271703398"
 
 [[dependencies]]
 name = "minilib-common"
