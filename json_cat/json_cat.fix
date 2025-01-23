@@ -41,12 +41,12 @@ main = (
         let input_fh = *if input.is_none {
             pure $ IO::stdin
         } else {
-            open_file(Path::parse(input.as_some).as_some, "r")
+            open_file(input.as_some, "r")
         };
         let output_fh = *if output.is_none {
             pure $ IO::stdout
         } else {
-            open_file(Path::parse(output.as_some).as_some, "w")
+            open_file(output.as_some, "w")
         };
         let text = *IO::read_string(input_fh);
         let json = *JsonDecoder::decode(text).from_result;

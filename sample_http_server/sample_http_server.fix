@@ -112,7 +112,7 @@ namespace AppState {
             chat_board: ChatBoard::empty
         };
         let chat_board = *state.@chat_board.read_template(
-            Path::parse(state.@asset_dir + "chat_board.html").as_some
+            state.@asset_dir + "chat_board.html"
         );
         let state = state.set_chat_board(chat_board);
         let state_var = *Var::make(state).lift;

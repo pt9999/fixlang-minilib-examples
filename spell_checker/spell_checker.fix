@@ -399,12 +399,12 @@ main = (
         let dict_cache_file = matches.get_one("dict-cache").as_some;
 
         let checker = *if *dict_cache_file.file_exists.lift {
-            load_dict_cache(Path::parse(dict_cache_file).as_some)
+            load_dict_cache(dict_cache_file)
         } else {
             let checker = *SpellChecker::from_word_list_file(
-                Path::parse(word_list_file).as_some
+                word_list_file
             );
-            let _ = *checker.save_dict_cache(Path::parse(dict_cache_file).as_some);
+            let _ = *checker.save_dict_cache(dict_cache_file);
             pure $ checker
         };
 

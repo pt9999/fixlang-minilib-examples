@@ -117,7 +117,7 @@ namespace AppState {
         let args = *IO::get_args.lift;
         let app_dir = if args.get_size > 0 { dirname(args.@(0)) } else { "." };
         let asset_dir = join_paths([app_dir, "assets/"]);
-        let html_path = Path::parse(asset_dir + "fractal.html").as_some;
+        let html_path = asset_dir + "fractal.html";
         let state = AppState {
             asset_dir: asset_dir,
             html_path: html_path

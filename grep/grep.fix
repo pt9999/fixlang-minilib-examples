@@ -39,7 +39,7 @@ process_files = |regexp, input_files| (
         } else {
             none()
         };
-        with_file(Path::parse(input_file).as_some, "r", |input_fh|
+        with_file(input_file, "r", |input_fh|
             process_file(regexp, input_fh, filename)
         )
     )

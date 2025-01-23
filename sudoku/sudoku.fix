@@ -821,7 +821,7 @@ command_solve = (
 
 run_command_solve: ArgMatches -> IOFail ();
 run_command_solve = |submatches| (
-    let input_path = submatches.get_one("input").bind(Path::parse);
+    let input_path = submatches.get_one("input");
     let max_step: I64 = *submatches.get_one("max_step").as_some.from_string.from_result;
     let verbose = submatches.get_one("verbose").as_some;
     let problem = *if input_path.is_some {
@@ -882,7 +882,7 @@ write_problem_file = |submatches, problem| (
     let output_path = submatches.get_one("output");
     if output_path.is_none { pure() };
     let output_path = output_path.as_some;
-    eval *write_file_string(Path::parse(output_path).as_some, problem.to_string);
+    eval *write_file_string(output_path, problem.to_string);
     let output_svg = submatches.get_one("svg").as_some == "true";
     if !output_svg { pure () };
     let output_svg_path = output_path + ".svg";
