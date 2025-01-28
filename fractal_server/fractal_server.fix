@@ -78,7 +78,7 @@ render_png_image = |param| (
     let render_scanline: I64 -> IO (Array (U8, U8, U8)) = |y| (
         let _ = *pure();
         let im = y.to_F64 / height.to_F64 * (yrange.@1 - yrange.@0) + yrange.@0;
-        pure $ Iterator::range(0, width).to_array.map(|x|
+        pure $ Array::from_map(width, |x|
             let re = x.to_F64 / width.to_F64  * (xrange.@1 - xrange.@0) + xrange.@0;
             let color = mandelbrot(re, im, loop_max).palette(loop_max);
             color
@@ -91,15 +91,19 @@ render_png_image = |param| (
     let _ = *task_pool.shutdown.lift;
 
     let image = Image::make(width, height, "RGB");
-    let image = Iterator::range(0, height).fold(
-        image, |image, y|
+    let image = loop(
+        (image, 0), |(image, y)|
+        if y >= height { break $ image };
         let scanline = scanlines.@(y);
-        Iterator::range(0, width).fold (
-            image, |image, x|
+        let image = loop(
+            (image, 0), |(image, x)|
+            if x >= width { break $ image };
             let color = scanline.@(x);
             let index = image.calc_index(x, y, 0);
-            image.set_rgb(index, color)
-        )
+            let image = image.set_rgb(index, color);
+            continue $ (image, x + 1)
+        );
+        continue $ (image, y + 1)
     );
     image.write_png_to_memory
 );
