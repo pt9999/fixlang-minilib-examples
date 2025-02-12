@@ -65,7 +65,7 @@ namespace PrimeGen {
     // in parallel, then finds the first result that meets the specified condition.
     // Returns the default value if no one meets the condition.
     // This function uses the task pool for each computation.
-    _find_first_or: a -> (a -> Bool) -> Iterator (IO a) -> PrimeGen -> IO a;
+    _find_first_or: a -> (a -> Bool) -> DynIterator (IO a) -> PrimeGen -> IO a;
     _find_first_or = |default, f, iter, prime_gen| (
         // Create futures for each computation.
         let task_pool = *prime_gen.@task_pool_var.get;
@@ -74,7 +74,7 @@ namespace PrimeGen {
 
         // Wait for futures and stop at the first result that meets the condition.
         let result = *futures.as_ok.loop_iter_m(
-            default, |result, future|
+            default, |future, result|
             let a = *future.get.to_result;
             assert_lazy(|_| "future.get failed: " + a.as_err, a.is_ok) $ |_|
             let a = a.as_ok;
@@ -127,7 +127,7 @@ namespace PrimeGen {
         let checks = Iterator::range(0, group_size).map(|i|
             let n = n + BigInt::from_I64(i);
             prime_gen._is_weak_probable_prime(n)
-        );
+        ).to_dyn;
         let opt = *prime_gen._find_first_or(none(), is_some, checks);
         if opt.is_none {
             prime_gen._next_weak_probable_prime(n + BigInt::from_I64(group_size))
@@ -246,7 +246,7 @@ namespace PrimeGen {
             // maybe prime
             pure $ true
         );
-        let checks = Iterator::range(0, k).map(|_| maybe_prime);
+        let checks = Iterator::range(0, k).map(|_| maybe_prime).to_dyn;
         prime_gen._find_first_or(true, |x| x == false, checks)
     );
 
@@ -278,7 +278,7 @@ namespace PrimeGen {
             };
             pure $ true
         );
-        let checks = Iterator::range(0, k).map(|_| maybe_prime);
+        let checks = Iterator::range(0, k).map(|_| maybe_prime).to_dyn;
         prime_gen._find_first_or(true, |x| x == false, checks)
     );
 }

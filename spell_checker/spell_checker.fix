@@ -24,6 +24,7 @@ import Minilib.App.Clap;
 import Minilib.Encoding.Binary;
 import Minilib.IO.FileSystem;
 import Minilib.Text.StringEx;
+import Minilib.Trait.Traversable;
 
 namespace SpellChecker {
     type SpellChecker = unbox struct {
@@ -52,7 +53,7 @@ namespace SpellChecker {
         /*
         let _ = *eprintln("deleted count=" + checker.@symspell.get_size.to_string).lift;
         let (count, time) = consumed_time_while_lazy (|_|
-            checker.@symspell.to_iter.fold(0, |n, (k, words)| n + words.get_size)
+            checker.@symspell.to_iter.fold(0, |(k, words), n| n + words.get_size)
         );
         let _ = *eprintln("word count=" + count.to_string).lift;
         let _ = *eprintln("word count time=" + time.to_string).lift;
@@ -76,7 +77,7 @@ namespace SpellChecker {
         let checker = SpellChecker::empty;
         let words = word_lists.split_by(Character::is_space);
         words.zip(Iterator::count_up(0)).loop_iter(
-            checker, |checker, (word, i)|
+            checker, |(word, i), checker|
             //if i >= 10000 { break $ checker };
             eval if i % 1000 == 0 { debug_eprintln(i.to_string) } else { () };
             continue $ checker.add_word(word)
@@ -98,27 +99,23 @@ namespace SpellChecker {
         let checker = checker.mod_words(insert(word));
         let k = _max_delete_char_count(word);
         _delete_chars(k, word).to_iter.fold(
-            checker, |checker, deleted|
+            checker, |deleted, checker|
             checker.mod_symspell(_upsert(deleted, [word], push_back(word)))
         )
     );
 
-    find_word: String -> SpellChecker -> Iterator String;
+    find_word: String -> SpellChecker -> Array String;
     find_word = |typemiss_word, checker| (
         if checker.@words.contains(typemiss_word) {
-            Iterator::empty
+            []
         };
         let k = _max_delete_char_count(typemiss_word);
-        let candidates: Iterator String = (
-            _delete_chars(k, typemiss_word).to_iter.map(
-                |typemiss_deleted|
-                checker.@symspell.find(typemiss_deleted)
-                .map_or(Iterator::empty, to_iter)
-            )
-            .flatten
-        );
+        let candidates: Array String = do {
+            let typemiss_deleted = *_delete_chars(k, typemiss_word);
+            checker.@symspell.find(typemiss_deleted).as_some_or([])
+        };
         //let candidates = candidates.push_front(typemiss_word);
-        let candidates = HashSet::from_iter(candidates).to_iter;    // uniq
+        let candidates = HashSet::from_iter(candidates.to_iter).to_iter;    // uniq
         let candidates = candidates.map(|word|
             (levenshtein(word, typemiss_word), word)
         );
@@ -130,11 +127,11 @@ namespace SpellChecker {
         // filter by levenshtein
         let max_levenshtein = 2;
         let min_levenshtein = candidates.fold(
-            max_levenshtein, |min_levenshtein, (i, w)|
+            max_levenshtein, |(i, w), min_levenshtein|
             min(min_levenshtein, i)
         );
         let candidates = candidates.filter(|(i, w)| i == min_levenshtein);
-        candidates.map(|(i,w)| w)
+        candidates.map(|(i,w)| w).to_array
     );
 
     _max_delete_char_count: String -> I64;
@@ -270,11 +267,11 @@ namespace DictCache {
         )
     );
 
-    write_words: Iterator String -> ByteBuffer -> ByteBuffer;
+    write_words: [iter: Iterator, Item iter = String] iter -> ByteBuffer -> ByteBuffer;
     write_words = |iter, buf| (
-        let size = iter.fold(0, |size, _| size + 1);
+        let size = iter.fold(0, |_, size| size + 1);
         let buf = buf.write_U64(size.to_U64);
-        let buf = iter.fold(buf, |buf, word|
+        let buf = iter.fold(buf, |word, buf|
             buf.write_string(word)
         );
         buf
@@ -283,9 +280,9 @@ namespace DictCache {
     write_symspell: HashMap String (Array String) -> ByteBuffer -> ByteBuffer;
     write_symspell = |map, buf| (
         let iter = map.to_iter;
-        let size = iter.fold(0, |size, _| size + 1);
+        let size = iter.fold(0, |_, size| size + 1);
         let buf = buf.write_U64(size.to_U64);
-        let buf = iter.fold(buf, |buf, (deleted, words)|
+        let buf = iter.fold(buf, |(deleted, words), buf|
             let buf = buf.write_string(deleted);
             buf.write_words(words.to_iter)
         );
@@ -372,10 +369,7 @@ test_delete_chars = (
             if line == "" { break_m $ () };
             let word = line.strip_spaces;
             let words = _delete_chars(2, word);
-            let _ = *words.to_iter.fold_m(
-                (), |_, w|
-                eprintln(w).lift
-            );
+            let _ = *words.foreach_m(eprintln).lift;
             continue_m $ ()
         )
     }
@@ -417,10 +411,9 @@ main = (
             let typemiss_word = line.strip_spaces;
             let words = checker.find_word(typemiss_word);
             let _ = *println("Candidates are:").lift;
-            let _ = *words.fold_m(
-                (), |_, word|
-                println("  " + word).lift
-            );
+            let _ = *words.foreach_m(|word|
+                println("  " + word)
+            ).lift;
             continue_m $ ()
         )
     }

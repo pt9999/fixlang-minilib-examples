@@ -91,24 +91,24 @@ namespace Board {
         .fold(0, add)
     );
 
-    // マスのイテレータ
-    cells: Iterator (I64, I64);
+    // マスの配列
+    cells: Array (I64, I64);
     cells = do {
-        let row = *Iterator::range(0, 9);
-        let col = *Iterator::range(0, 9);
+        let row = *Iterator::range(0, 9).to_array;
+        let col = *Iterator::range(0, 9).to_array;
         pure $ (row, col)
     };
 
-    // 数字が配置されているマスのイテレータを返す
-    get_nonempty_cells: Board -> Iterator (I64, I64);
+    // 数字が配置されているマスの配列を返す
+    get_nonempty_cells: Board -> Array (I64, I64);
     get_nonempty_cells = |board| (
-        Board::cells.filter(|(row, col)| board.get_digit(row, col).is_some)
+        Board::cells.to_iter.filter(|(row, col)| board.get_digit(row, col).is_some).to_array
     );
 
-    // 数字が配置されていないマスのイテレータを返す
-    get_empty_cells: Board -> Iterator (I64, I64);
+    // 数字が配置されていないマスの配列を返す
+    get_empty_cells: Board -> Array (I64, I64);
     get_empty_cells = |board| (
-        Board::cells.filter(|(row, col)| board.get_digit(row, col).is_none)
+        Board::cells.to_iter.filter(|(row, col)| board.get_digit(row, col).is_none).to_array
     );
 }
 
@@ -128,14 +128,14 @@ impl Board: FromString {
         // 9行9列であることを確認する。
         if lines.get_size != 9 { err $ "invalid row size" };
         let _ = *lines.to_iter.fold_m(
-            (), |_, line|
+            (), |line, _|
             if line.get_size != 9 { err $ "invalid col size" };
             ok()
         );
         // 盤面の各マスを読み込む。
         let board = Board::empty;
-        Iterator::range(0, 9).fold_m(board, |board, row|
-            Iterator::range(0, 9).fold_m(board, |board, col|
+        Iterator::range(0, 9).fold_m(board, |row, board|
+            Iterator::range(0, 9).fold_m(board, |col, board|
                 let line = lines.@(row);
                 let c = line.get_bytes.@(col);
                 let digit = if '1' <= c && c <= '9' { some(c - '1' + 1_U8) } else { none() };
@@ -197,9 +197,9 @@ namespace BitVec {
     );
 
     // 配置可能な数字のイテレータを返す。
-    to_iter: BitVec -> Iterator I64;
+    to_iter: BitVec -> DynIterator I64;
     to_iter = |vec| (
-        Iterator::range(1, 9 + 1).filter(|digit| vec.get_bit(digit))
+        Iterator::range(1, 9 + 1).filter(|digit| vec.get_bit(digit)).to_dyn
     );
 }
 
@@ -228,13 +228,13 @@ namespace Candidates {
     // 指定した行全体の配置可能候補を更新する
     mod_row: I64 -> (BitVec -> BitVec) -> Candidates -> Candidates;
     mod_row = |row, f, cand| Iterator::range(0, 9).fold(
-        cand, |cand, col| cand.mod_bitvec(row, col, f)
+        cand, |col, cand| cand.mod_bitvec(row, col, f)
     );
 
     // 指定した列全体の配置可能候補を更新する
     mod_col: I64 -> (BitVec -> BitVec) -> Candidates -> Candidates;
     mod_col = |col, f, cand| Iterator::range(0, 9).fold(
-        cand, |cand, row| cand.mod_bitvec(row, col, f)
+        cand, |row, cand| cand.mod_bitvec(row, col, f)
     );
 
     // 指定したマスを含むブロックの配置可能候補を更新する
@@ -243,7 +243,7 @@ namespace Candidates {
         let top = row / 3 * 3;
         let left = col / 3 * 3;
         Iterator::range(0, 9).fold(
-            cand, |cand, i| cand.mod_bitvec(top + i / 3, left + i % 3, f)
+            cand, |i, cand| cand.mod_bitvec(top + i / 3, left + i % 3, f)
         )
     );
 
@@ -259,8 +259,8 @@ namespace Candidates {
     init_with_board: Board -> Candidates;
     init_with_board = |board| (
         let cand = Candidates::full;
-        Iterator::range(0, 9).fold(cand, |cand, row|
-            Iterator::range(0, 9).fold(cand, |cand, col|
+        Iterator::range(0, 9).fold(cand, |row, cand|
+            Iterator::range(0, 9).fold(cand, |col, cand|
                 let digit = board.get_digit(row, col);
                 if digit.is_none { cand };
                 let digit = digit.as_some.to_I64;
@@ -279,7 +279,7 @@ namespace Candidates {
     find_min_candidates_cell: Board -> Candidates -> Option (I64, I64, I64);
     find_min_candidates_cell = |board, cand| (
         let min_cell: Option (I64, I64, I64) = none();
-        board.get_empty_cells.fold(min_cell, |min_cell, (row, col)|
+        board.get_empty_cells.to_iter.fold(min_cell, |(row, col), min_cell|
             let bitvec = cand.get_bitvec(row, col);
             let num_cand = bitvec.get_num_candidates;
             if min_cell.is_none || min_cell.as_some.@0 > num_cand {
@@ -380,7 +380,7 @@ namespace Solver {
         let (solutions, step) = *solver.solve(state);
         let _ = *println((solutions.get_size, step).format("{} 個の解が見つかりました。(ステップ数: {})")).lift;
         eval *solutions.to_iter.fold_m(
-            (), |_, state|
+            (), |state, _|
             println("\n" + state.to_string).lift
         );
         pure $ solutions
@@ -434,9 +434,9 @@ namespace Solver {
 
         //  候補の各々について、その数字を配置した盤面を生成し、スタックに積む。
         let bitvec = state.@candidates.get_bitvec(row, col);
-        let _ = *solver._progress(|_| (state.@digit_count, (row, col), bitvec.to_iter.map(to_string).join(","))
+        let _ = *solver._progress(|_| (state.@digit_count, (row, col), bitvec.to_iter.Iterator::map(to_string).join(","))
                                 .format("{}: {} に配置可能な数字: {}"));
-        let solver = bitvec.to_iter.fold(solver, |solver, digit|
+        let solver = bitvec.to_iter.fold(solver, |digit, solver|
             solver._push_stack(state.place_digit(row, col, digit))
         );
         solver._solve_inner
@@ -556,7 +556,7 @@ namespace Generator {
             };
 
             // 数字があるマスを1つ選択する
-            let nonempty_cells = state.@board.get_nonempty_cells.to_array;
+            let nonempty_cells = state.@board.get_nonempty_cells;
             let (row, col) = *gen._select_random(nonempty_cells);
             assert_lazy(|_| "should be nonempty", state.@board.get_digit(row, col).is_some) $ |_|
 
@@ -616,9 +616,9 @@ namespace Generator {
             let board = Board::empty;
             let start = [0, 3, 6, 1, 4, 7, 2, 5, 8];
             Iterator::range(0, 9).fold(
-                board, |board, row|
+                board, |row, board|
                 Iterator::range(0, 9).fold(
-                    board, |board, col|
+                    board, |col, board|
                     let digit = some $ ((start.@(row) + col) % 9 + 1).to_U8;
                     board.set_digit(row, col, digit)
                 )
@@ -630,9 +630,9 @@ namespace Generator {
         subst_digit: Array I64 -> Board -> Board;
         subst_digit = |subst, board| (
             Iterator::range(0, 9).fold(
-                board, |board, row|
+                board, |row, board|
                 Iterator::range(0, 9).fold(
-                    board, |board, col|
+                    board, |col, board|
                     let digit = board.get_digit(row, col);
                     let digit = digit.map(|i| (subst.@(i.to_I64 - 1) + 1).to_U8);
                     board.set_digit(row, col, digit)
@@ -659,7 +659,7 @@ namespace Generator {
         swap_rows = |row1, row2, board| (
             if row1 == row2 { board };
             Iterator::range(0, 9).fold(
-                board, |board, col|
+                board, |col, board|
                 board.swap_cells((row1, col), (row2, col))
             )
         );
@@ -669,7 +669,7 @@ namespace Generator {
         swap_cols = |col1, col2, board| (
             if col1 == col2 { board };
             Iterator::range(0, 9).fold(
-                board, |board, row|
+                board, |row, board|
                 board.swap_cells((row, col1), (row, col2))
             )
         );
@@ -715,7 +715,7 @@ namespace BoardSvg {
                         .fill("white");
         let lines = Svg::group.fill("black");
         let lines = Iterator::range(0, 9 + 1).fold(
-            lines, |lines, i|
+            lines, |i, lines|
             let lw = if i % 3 == 0 { line_width_L } else { line_width_S };
             let hline = Svg::rect(0.0, i.to_F64 * cell_size, board_size, lw);
             let vline = Svg::rect(i.to_F64 * cell_size, 0.0, lw, board_size);
@@ -724,9 +724,9 @@ namespace BoardSvg {
         let texts = Svg::group.fill("black")
                     .font_family("SansSerif").font_size(font_siz);
         let texts = Iterator::range(0, 9).fold(
-            texts, |texts, row|
+            texts, |row, texts|
             Iterator::range(0, 9).fold(
-                texts, |texts, col|
+                texts, |col, texts|
                 let digit = board.get_digit(row, col);
                 if digit.is_none { texts };
                 let text = Svg::text(digit.as_some.to_string)
