@@ -12,13 +12,14 @@ EXAMPLES = \
 
 SUBDIR_MAKEFILE = $$(pwd)/subdir.make
 
-.PHONY: all build clean publish
-.SUFFIXES: .build .clean .publish
+.PHONY: all build clean update-deps publish
+.SUFFIXES: .build .clean .update-deps .publish
 
 all: build
 
 build: $(EXAMPLES:%=%.build)
 clean: $(EXAMPLES:%=%.clean)
+update-deps: $(EXAMPLES:%=%.update-deps)
 publish: $(EXAMPLES:%=%.publish) regression-test publish-deps
 
 %.build:
@@ -26,6 +27,9 @@ publish: $(EXAMPLES:%=%.publish) regression-test publish-deps
 
 %.clean:
 	make -C $* -f $(SUBDIR_MAKEFILE) clean
+
+%.update-deps:
+	make -C $* -f $(SUBDIR_MAKEFILE) clean update-deps
 
 %.publish: 
 	make -C $* -f $(SUBDIR_MAKEFILE) clean update-deps build
