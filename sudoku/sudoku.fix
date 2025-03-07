@@ -26,6 +26,7 @@ import Random;
 import Time;
 
 import Minilib.Common.Assert;
+import Minilib.Common.IOEx;
 import Minilib.App.Clap;
 import Minilib.Encoding.Xml;
 import Minilib.Common.RandomEx;
@@ -44,17 +45,6 @@ bytes_to_string = |bytes| bytes.push_back(0_U8)._unsafe_from_c_str;
 filter_chars: (U8 -> Bool) -> String -> String;
 filter_chars = |f, str| (
     str.get_bytes.pop_back.to_iter.filter(f).to_array.bytes_to_string
-);
-
-// ファイルストリームをフラッシュする。
-fflush : IOHandle -> IOFail ();
-fflush = |handle| (
-    let _ = *pure();    // make it lazy
-    let res = FFI_CALL[I32 fflush(Ptr), handle._file_ptr];
-    if res < 0_I32 {
-        throw("flush failed!: some error occurred in fflush.")
-    };
-    pure()
 );
 
 // ------------------------------------------------------------

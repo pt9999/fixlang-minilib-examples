@@ -56,8 +56,12 @@ command = (
 main: IO ();
 main = (
     do {
-        let _ = *pure();
-        let _ = FFI_CALL[() setbuf(Ptr, Ptr), IO::stdout._file_ptr, nullptr];
+        let set_unbuffered_mode: IOHandle -> IO () = |handle| (
+            pure();;
+            let file_ptr = *handle.get_file_ptr;
+            FFI_CALL_IO[() setbuf(Ptr, Ptr), file_ptr, nullptr]
+        );
+        set_unbuffered_mode(IO::stdout).lift;;
         let time = FFI_CALL[I32 time(Ptr), nullptr];
 
         let matches = *command.get_matches;
