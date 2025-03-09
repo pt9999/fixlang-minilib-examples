@@ -21,6 +21,7 @@ import AsyncTask;
 import Random;
 
 import Minilib.Common.Assert;
+import Minilib.Common.IOEx;
 import Minilib.Math.BigNat;
 import Minilib.Math.BigInt;
 import Minilib.Math.Types;
@@ -55,7 +56,8 @@ namespace PrimeGen {
     _progress: String -> PrimeGen -> IO ();
     _progress = |str, prime_gen| (
         if prime_gen.@progress {
-            eprint(str)
+            eprint(str);;
+            fflush(stderr).to_result.forget
         } else {
             pure()
         }

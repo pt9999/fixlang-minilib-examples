@@ -24,7 +24,8 @@ type Param = unbox struct {
     begin_bits: I64,
     step_bits: I64,
     end_bits: I64,
-    seed: I64
+    seed: I64,
+    progress: Bool,
 };
 
 generate_probable_primes: Param -> IO ();
@@ -33,7 +34,7 @@ generate_probable_primes = |p| (
     let _ = *println("It may take several minutes. Please be patient.");
     let _ = *println("");
     let random = Random::init_by_seed(p.@seed.to_U64);
-    let prime_gen = *PrimeGen::make(random, false);
+    let prime_gen = *PrimeGen::make(random, p.@progress);
     loop_m(
         p.@begin_bits, |bit_length|
         if bit_length > p.@end_bits { break_m $ () };
@@ -51,6 +52,7 @@ command = (
     .arg(Arg::new("to").short('t').long("to").help("Maximum number of bits").takes_value.default_value("1024"))
     .arg(Arg::new("step").short('s').long("step").help("Step of bits").takes_value.default_value("128"))
     .arg(Arg::new("seed").long("seed").help("Seed of the random number generator (default: current time)").takes_value)
+    .arg(Arg::new("progress").short('p').long("progress").help("Show progress"))
 );
 
 main: IO ();
@@ -69,7 +71,8 @@ main = (
             begin_bits: *matches.get_one("from").as_some.from_string.from_result,
             step_bits: *matches.get_one("step").as_some.from_string.from_result,
             end_bits: *matches.get_one("to").as_some.from_string.from_result,
-            seed: *matches.get_one("seed").as_some_or(time.to_string).from_string.from_result
+            seed: *matches.get_one("seed").as_some_or(time.to_string).from_string.from_result,
+            progress: matches.get_one("progress").is_some
         };
         generate_probable_primes(param).lift
     }
