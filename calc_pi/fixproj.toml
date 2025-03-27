@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [build]
 output = "calc_pi.out"
-opt_level = "basic"
+opt_level = "max"
 files = [
     "calc_pi.fix",
 ]

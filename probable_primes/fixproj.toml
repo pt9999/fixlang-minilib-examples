@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [build]
 output = "probable_primes.out"
-opt_level = "basic"
+opt_level = "max"
 files = [
     "probable_primes.fix",
     "bigint_prime.fix",
