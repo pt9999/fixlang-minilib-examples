@@ -74,12 +74,12 @@ rev = "3503235c2dc926d2ae2a937a338752b28ef6770f"
 
 [[dependencies]]
 name = "minilib-collection"
-version = "0.5.2"
-path = ".fixlang/deps/minilib-collection_0.5.2"
+version = "0.6.0"
+path = ".fixlang/deps/minilib-collection_0.6.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-collection.git"
-rev = "65cd997b4aa9a2b348721ea00e6dcbb14a0ca8d9"
+rev = "062e4456dc06122643641aee5bf40f554ac69a7a"
 
 [[dependencies]]
 name = "random"
