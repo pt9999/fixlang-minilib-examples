@@ -2,11 +2,13 @@
 module Main;
 
 import Random;
+import Time;
 
 import Minilib.App.Clap;
 import Minilib.Math.BigInt;
 import Minilib.Math.BigIntPrime;
 import Minilib.Text.StringEx;
+import Minilib.Common.IOEx;
 import Minilib.Common.TimeEx;
 
 generate_probable_prime: I64 -> PrimeGen -> IO ();
@@ -58,13 +60,9 @@ command = (
 main: IO ();
 main = (
     do {
-        let set_unbuffered_mode: IOHandle -> IO () = |handle| (
-            pure();;
-            let file_ptr = *handle.get_file_ptr;
-            FFI_CALL_IO[() setbuf(Ptr, Ptr), file_ptr, nullptr]
-        );
         set_unbuffered_mode(IO::stdout).lift;;
-        let time = FFI_CALL[I32 time(Ptr), nullptr];
+        let time = *Time::get_now.lift;
+        let time = time.to_F64.to_I64;
 
         let matches = *command.get_matches;
         let param = Param {

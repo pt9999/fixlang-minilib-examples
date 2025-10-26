@@ -17,14 +17,10 @@ module Main;
 import AsyncTask;
 
 import Minilib.Common.Assert;
+import Minilib.Common.TimeEx;
 import Minilib.App.Clap;
 import Minilib.Collection.Deque;
 import Minilib.Net.Tcp;
-
-_usleep: I64 -> I64;
-_usleep = |usec| (
-    FFI_CALL[I32 usleep(U32), usec.to_U32].to_I64
-);
 
 namespace ChatEvent {
     type ChatEvent = unbox union {
@@ -165,7 +161,7 @@ chat_input_task = |bufsock, member, room| (
         //let bufsock = *bufsock.flush;
         //let _ = *eprintln("recv start").lift;
         let (line, bufsock) = *bufsock.read_line;
-        //eval _usleep(1000);
+        //usleep(1000_U32);;
         //let _ = *eprintln("read_line end: size=" + line.get_size.to_string).lift;
         if line.get_size == 0 {
             let _ = *eprintln("chat session end").lift;
