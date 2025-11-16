@@ -32,7 +32,7 @@ process_files = |regexp, input_files| (
     if input_files.is_empty {
         process_file(regexp, IO::stdin, none())
     };
-    input_files.foreach_m(
+    input_files.to_iter.foreach_m(
         |input_file|
         let filename = if input_files.get_size >= 2 {
             some(input_file)

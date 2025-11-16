@@ -32,6 +32,7 @@ import Minilib.Encoding.Xml;
 import Minilib.Common.RandomEx;
 import Minilib.Media.Svg;
 import Minilib.Text.StringEx;
+import Minilib.Trait.Traversable;
 
 // ------------------------------------------------------------
 // ヘルパー定義
@@ -117,8 +118,8 @@ impl Board: FromString {
         let lines = lines.to_array;
         // 9行9列であることを確認する。
         if lines.get_size != 9 { err $ "invalid row size" };
-        lines.to_iter.fold_m(
-            (), |line, _|
+        lines.to_iter.foreach_m(
+            |line|
             if line.get_size != 9 { err $ "invalid col size" };
             ok()
         );;
@@ -369,10 +370,7 @@ namespace Solver {
     solve_problem_and_print_solutions = |state, solver| (
         let (solutions, step) = *solver.solve(state);
         println((solutions.get_size, step).format("{} 個の解が見つかりました。(ステップ数: {})")).lift;;
-        solutions.to_iter.fold_m(
-            (), |state, _|
-            println("\n" + state.to_string).lift
-        );;
+        solutions.to_iter.foreach_m(|state| println("\n" + state.to_string)).lift;;
         pure $ solutions
     );
 

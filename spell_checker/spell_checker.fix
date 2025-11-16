@@ -370,7 +370,7 @@ test_delete_chars = (
             if line == "" { break_m $ () };
             let word = line.strip_spaces;
             let words = _delete_chars(2, word);
-            words.foreach_m(eprintln).lift;;
+            words.to_iter.foreach_m(eprintln).lift;;
             continue_m $ ()
         )
     }
@@ -412,7 +412,7 @@ main = (
             let typemiss_word = line.strip_spaces;
             let words = checker.find_word(typemiss_word);
             println("Candidates are:").lift;;
-            words.foreach_m(|word|
+            words.to_iter.foreach_m(|word|
                 println("  " + word)
             ).lift;;
             continue_m $ ()
