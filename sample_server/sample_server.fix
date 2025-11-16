@@ -115,7 +115,7 @@ namespace ChatRoom {
         room_var.lock(|room|
             let (event, room) = room.receive_event(id);
             if event.is_none { pure $ event };
-            let _ = *room_var.Var::set(room);
+            room_var.Var::set(room);;
             pure $ event
         )
     );
@@ -126,7 +126,7 @@ namespace ChatRoom {
             has_event(id), |room|
             let (event, room) = room.receive_event(id);
             assert_lazy(|_|"event.is_some", event.is_some) $ |_|
-            let _ = *room_var.Var::set(room);
+            room_var.Var::set(room);;
             pure $ event.as_some
         )
     );
@@ -134,11 +134,11 @@ namespace ChatRoom {
 
 chat: Socket -> String -> Var ChatRoom -> IOFail ();
 chat = |socket, addr, room| (
-    let _ = *eprintln("chat session start: socket=" + socket.to_string).lift;
+    eprintln("chat session start: socket=" + socket.to_string).lift;;
     let member_id = addr;
     let name = addr;
     let member = ChatMember::make(member_id, name);
-    let _ = *room.mod(add_member(member)).lift;
+    room.mod(add_member(member)).lift;;
     let bufsock = BufferedSocket::make(socket);
     let bufsock = *bufsock.write_str("SYSTEM: This is a chat room. Please type in your messages.\n");
     let bufsock = *bufsock.flush;
@@ -154,24 +154,24 @@ chat_input_task: BufferedSocket -> ChatMember -> Var ChatRoom -> IO ();
 chat_input_task = |bufsock, member, room| (
     let member_id = member.@id;
     let name = member.@name;
-    let _ = *room.mod(send_event_to_all(ChatEvent::message("SYSTEM: " + name + " has logged in\n"))).lift;
+    room.mod(send_event_to_all(ChatEvent::message("SYSTEM: " + name + " has logged in\n"))).lift;;
     loop_m(
         bufsock, |bufsock|
         //let bufsock = *bufsock.write_str("> ");     // TODO: writing prompt is safe?
         //let bufsock = *bufsock.flush;
-        //let _ = *eprintln("recv start").lift;
+        //eprintln("recv start").lift;;
         let (line, bufsock) = *bufsock.read_line;
         //usleep(1000_U32);;
-        //let _ = *eprintln("read_line end: size=" + line.get_size.to_string).lift;
+        //eprintln("read_line end: size=" + line.get_size.to_string).lift;;
         if line.get_size == 0 {
-            let _ = *eprintln("chat session end").lift;
-            let _ = *room.mod(send_event_to_all(ChatEvent::message("SYSTEM: " + name + " has logged out\n"))).lift;
-            let _ = *room.mod(send_event_to_member(member_id, ChatEvent::disconnect())).lift;
+            eprintln("chat session end").lift;;
+            room.mod(send_event_to_all(ChatEvent::message("SYSTEM: " + name + " has logged out\n"))).lift;;
+            room.mod(send_event_to_member(member_id, ChatEvent::disconnect())).lift;;
             break_m $ ()
         };
         let message = "(" + name + "): " + line;
-        let _ = *eprint("> " + message).lift;
-        let _ = *room.mod(send_event_to_all(ChatEvent::message(message))).lift;
+        eprint("> " + message).lift;;
+        room.mod(send_event_to_all(ChatEvent::message(message))).lift;;
         continue_m $ bufsock
     )
 ).try(|err| eprintln (err));
@@ -183,10 +183,10 @@ chat_send_message_task = |bufsock, member, room| (
         bufsock, |bufsock|
         let event: ChatEvent = *room.wait_next_event(member_id).lift;
         if event.is_disconnect {
-            //let _ = *eprintln("got event: disconnect").lift;
+            //eprintln("got event: disconnect").lift;;
             break_m $ ()
         };
-        //let _ = *eprintln("got event: message").lift;
+        //eprintln("got event: message").lift;;
         let bufsock = *bufsock.write_str(event.as_message);
         let bufsock = *bufsock.flush; // TODO: sharing bufsocket is safe?
         continue_m $ bufsock
@@ -210,26 +210,26 @@ server_test = (
         let port = matches.get_one("port").as_some;
         let server_host_port = host + ":" + port;
 
-        let _ = *(lift $ eprintln ("Server started"));
+        lift $ eprintln ("Server started");;
         let socket = *(listen_tcp_server(server_host_port, 10));
-        let _ = *(lift $ eprintln ("Listening on " + server_host_port));
+        lift $ eprintln ("Listening on " + server_host_port);;
         let room = *Var::make(ChatRoom::empty).lift;
         loop_m(
             (), |_|
-            let _ = *(lift $ eprintln ("Accepting connections"));
+            lift $ eprintln ("Accepting connections");;
             let (accepted_socket, addr) = *(socket.accept);
             let addr = addr.to_string;
-            let _ = *(lift $ eprintln ("Accepted new connection: addr=" + addr));
+            lift $ eprintln ("Accepted new connection: addr=" + addr);;
             if false {
-                let _ = *chat(accepted_socket, addr, room);
+                chat(accepted_socket, addr, room);;
                 continue_m $ ()
             } else {
-                let _ = *(lift $ eprintln ("creating task"));
+                lift $ eprintln ("creating task");;
                 let task = *AsyncIOTask::make(
                     chat(accepted_socket, addr, room)
                     .try(|err| eprintln("error: " + err))
                 ).lift;
-                let _ = *(lift $ eprintln ("creating task done"));
+                lift $ eprintln ("creating task done");;
                 continue_m $ ()
             }
         )

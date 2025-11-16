@@ -48,8 +48,8 @@ http_fetch = |url| (
     };
     let host_port = url.@host + ":" + url.@port;
     let path = url.@path;
-    //let _ = *println("host_port = " + host_port).lift;
-    //let _ = *println("path = " + path).lift;
+    //println("host_port = " + host_port).lift;;
+    //println("path = " + path).lift;;
     let socket = *connect_to_tcp_server(host_port);
     let bufsock = BufferedSocket::make(socket);
     let bufsock = *bufsock.write_str("GET " + path + " HTTP/1.0\n\n");
@@ -60,7 +60,7 @@ http_fetch = |url| (
         if line == "" {
             break_m $ ()
         };
-        eval *(lift $ eprint(line));
+        lift $ eprint(line);;
         continue_m $ bufsock
     )
 );
@@ -77,7 +77,7 @@ main = (
         );
         let matches = *command.get_matches;
         let url = matches.get_one("URL").as_some;
-        //let _ = *println("url = " + url).lift;
+        //println("url = " + url).lift;;
         let url = *URL::parse(url).from_result;
         http_fetch(url)
     }.try (

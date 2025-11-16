@@ -56,7 +56,7 @@ main = (
         } else {
             JsonEncoder::encode_pretty(json)
         };
-        let _ = *text2.write_string(output_fh);
+        text2.write_string(output_fh);;
         pure $ ()
     }.try (eprintln)
 );

@@ -87,7 +87,7 @@ namespace PrimeGen {
         );
 
         // Cancel all pending futures and clears the queue.
-        let _ = *task_pool.cancel_all_pendings_futures;
+        task_pool.cancel_all_pendings_futures;;
         pure $ result
     );
 
@@ -113,12 +113,12 @@ namespace PrimeGen {
         if !ret {
             //let id = n.to_string;
             //let id = id.get_sub(id.get_size - 3, id.get_size);
-            let _ = *prime_gen._progress("M");
+            prime_gen._progress("M");;
             prime_gen.next_probable_prime(n + one)
         };
         //let ret2 = *solovay_strassen(n);
         //eval if !ret2 { debug_eprintln("miller_rabin==true && solovay_strassen==false !!") } else { () };
-        let _ = *prime_gen._progress("!\n");
+        prime_gen._progress("!\n");;
         pure $ n
     );
 
@@ -140,18 +140,18 @@ namespace PrimeGen {
     // Returns true iff `n` is a weak probable prime number.
     _is_weak_probable_prime: BigInt -> PrimeGen -> IO (Option BigInt);
     _is_weak_probable_prime = |n, prime_gen| (
-        let _ = *pure();
+        pure();;
         //let id = n.to_string;
         //let id = id.get_sub(id.get_size - 3, id.get_size);
         //let id = (*FFI_CALL_IO[I32 pthread_self()]).to_string;
         //let id = id.get_sub(id.get_size - 3, id.get_size);
         let id = "";
         if !check_for_small_primes(n) {
-            let _ = *prime_gen._progress("."+id);
+            prime_gen._progress("."+id);;
             pure $ none()
         };
         if !fermat_base2(n) {
-            let _ = *prime_gen._progress("F"+id);
+            prime_gen._progress("F"+id);;
             pure $ none()
         };
         pure $ some(n)
@@ -221,8 +221,8 @@ namespace PrimeGen {
         // Accoding to Wikipedia, probability of false prime <= `4^(-k)`.
         let k = 50;
         let maybe_prime: IO Bool = (
-            let _ = *pure();
-            let _ = *prime_gen._progress("o");
+            pure();;
+            prime_gen._progress("o");;
             let a = *prime_gen.generate_bigint_range(two, n - two);
             let x = modpow(a, d, n);
             let (opt, y) = loop(
@@ -265,7 +265,7 @@ namespace PrimeGen {
         let n_minus_one_div_two = (n - one) / BigInt::two;
         let k = 100;
         let maybe_prime: IO Bool = (
-            let _ = *pure();
+            pure();;
             let a = *prime_gen.generate_bigint_range(BigInt::two, n);
             let x = jacobi_symbol(a, n);
             if x == 0 {

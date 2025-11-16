@@ -81,7 +81,7 @@ main_f64 = (
 main_bf: I64 -> IO ();
 main_bf = |prec10| (
     let pi = calc_pi_bf(prec10);
-    let _ = *println(pi.to_string_precision(prec10));
+    println(pi.to_string_precision(prec10));;
     pure()
 );
 
@@ -100,12 +100,11 @@ main = (
         let matches = *command.get_matches;
         let prec10 = *matches.get_one("prec").as_some.from_string.from_result;
         let f64 = matches.get_one("f64");
-        let _ = *if f64.is_some{
+        if f64.is_some{
             main_f64
         } else {
             main_bf(prec10)
-        }.lift;
-        pure()
+        }.lift
     }
     .try(eprintln)
 );

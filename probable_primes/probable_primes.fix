@@ -13,12 +13,12 @@ import Minilib.Common.TimeEx;
 
 generate_probable_prime: I64 -> PrimeGen -> IO ();
 generate_probable_prime = |bit_length, prime_gen| (
-    let _ = *println("Searching a probable prime of " + bit_length.to_string + " bits...");
+    println("Searching a probable prime of " + bit_length.to_string + " bits...");;
     let (n, time) = *consumed_realtime_while_io(
         prime_gen.probable_prime(bit_length)
     );
-    let _ = *println(n.to_string);
-    let _ = *println("time="+time.to_string);
+    println(n.to_string);;
+    println("time="+time.to_string);;
     pure()
 );
 
@@ -32,15 +32,15 @@ type Param = unbox struct {
 
 generate_probable_primes: Param -> IO ();
 generate_probable_primes = |p| (
-    let _ = *println((p.@begin_bits, p.@end_bits).format("This program generates probable primes of {} bit to {} bit."));
-    let _ = *println("It may take several minutes. Please be patient.");
-    let _ = *println("");
+    println((p.@begin_bits, p.@end_bits).format("This program generates probable primes of {} bit to {} bit."));;
+    println("It may take several minutes. Please be patient.");;
+    println("");;
     let random = Random::init_by_seed(p.@seed.to_U64);
     let prime_gen = *PrimeGen::make(random, p.@progress);
     loop_m(
         p.@begin_bits, |bit_length|
         if bit_length > p.@end_bits { break_m $ () };
-        let _ = *generate_probable_prime(bit_length, prime_gen);
+        generate_probable_prime(bit_length, prime_gen);;
         continue_m $ bit_length + p.@step_bits
     )
 );

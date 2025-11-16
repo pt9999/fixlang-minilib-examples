@@ -82,13 +82,13 @@ namespace ChatBoard {
         let name = req.find_query("name").map_or(_DEFAULT_NAME, |name|name);
         let message = req.find_query("message").map_or("", |s| s);
         // eval debug_eprintln("name="+name+" message="+message);
-        let _ = *if name == "" && message == "" {
+        if name == "" && message == "" {
             pure()
         } else {
             app_state_var.mod(
                 mod_chat_board(add_chat(Chat::make(name, message)))
             ).lift
-        };
+        };;
         let chat_board = *app_state_var.get.map(@chat_board).lift;
         let html = chat_board.render(name);
         res.content_type("html").write_str(html)
@@ -103,7 +103,7 @@ type AppState = unbox struct {
 namespace AppState {
     initialize: IOFail (Var AppState);
     initialize = (
-        let _ = *pure();    // make it lazy
+        pure();;    // make it lazy
         let args = *IO::get_args.lift;
         let app_dir = if args.get_size > 0 { dirname(args.@(0)) } else { "." };
         let asset_dir = join_paths([app_dir, "assets/"]);

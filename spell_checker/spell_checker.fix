@@ -43,23 +43,23 @@ namespace SpellChecker {
 
     from_word_list_file: Path -> IOFail SpellChecker;
     from_word_list_file = |filepath| (
-        let _ = *eprintln("loading word list file...").lift;
+        eprintln("loading word list file...").lift;;
         // IO::read_file_string() sometimes freezes
         let word_lists = (*_read_file_bytes_ex(filepath))._unsafe_to_string;
-        let _ = *eprintln("registering word list...").lift;
+        eprintln("registering word list...").lift;;
         let (checker, time) = consumed_time_while_lazy (|_|
             from_word_list_file_contents(word_lists)
         );
-        let _ = *eprintln("registering time=" + time.to_string).lift;
+        eprintln("registering time=" + time.to_string).lift;;
         /*
-        let _ = *eprintln("deleted count=" + checker.@symspell.get_size.to_string).lift;
+        eprintln("deleted count=" + checker.@symspell.get_size.to_string).lift;;
         let (count, time) = consumed_time_while_lazy (|_|
             checker.@symspell.to_iter.fold(0, |(k, words), n| n + words.get_size)
         );
-        let _ = *eprintln("word count=" + count.to_string).lift;
-        let _ = *eprintln("word count time=" + time.to_string).lift;
+        eprintln("word count=" + count.to_string).lift;;
+        eprintln("word count time=" + time.to_string).lift;;
         */
-        let _ = *eprintln("done.").lift;
+        eprintln("done.").lift;;
         pure $ checker
     );
 
@@ -69,7 +69,7 @@ namespace SpellChecker {
         let file_size = file_stat.st_size;
         let fh = *open_file(path, "r");
         let bytes = *read_n_bytes(fh, file_size);
-        let _ = *close_file(fh).lift;
+        close_file(fh).lift;;
         pure $ bytes
     );
 
@@ -199,7 +199,7 @@ namespace SpellChecker {
             );
             continue $ (arr, i1 + 1)
         );
-        let _ = loop(
+        eval loop(
             (arr, 0), |(arr, i1)|
             if i1 > n1 {
                 break $ arr
@@ -214,7 +214,7 @@ namespace SpellChecker {
 namespace DictCache {
     save_dict_cache: Path -> SpellChecker -> IOFail ();
     save_dict_cache = |path, checker| (
-        let _ = *println("saving " + path.to_string).lift;
+        println("saving " + path.to_string).lift;;
         let buf = ByteBuffer::empty(1024*1024, ByteOrder::little_endian());
         let buf = buf.write_words(checker.@words.to_iter);
         let buf = buf.write_symspell(checker.@symspell);
@@ -223,7 +223,7 @@ namespace DictCache {
 
     load_dict_cache: Path -> IOFail SpellChecker;
     load_dict_cache = |path| (
-        let _ = *println("loading " + path.to_string).lift;
+        println("loading " + path.to_string).lift;;
         let array = *_read_file_bytes_ex(path);
         let buf = ByteBuffer::make(array, ByteOrder::little_endian());
         let pos = 0;
@@ -232,7 +232,7 @@ namespace DictCache {
         let checker = SpellChecker::empty;
         let checker = checker.set_words(HashSet::from_iter(words.to_iter));
         let checker = checker.set_symspell(symspell);
-        let _ = *println("loading done").lift;
+        println("loading done").lift;;
         pure $ checker
     );
 
@@ -347,13 +347,13 @@ test_levenshtein = (
     do {
         loop_m(
             (), |_|
-            let _ = *eprintln("input word1,word2").lift;
+            eprintln("input word1,word2").lift;;
             let line = *read_line(IO::stdin);
             if line == "" { break_m $ () };
             let line = line.strip_spaces;
             let (word1, word2) = line.split_first(",");
             let c = levenshtein(word1, word2);
-            let _ = *eprintln("word1="+word1+" word2="+word2+" levenshtein="+c.to_string).lift;
+            eprintln("word1="+word1+" word2="+word2+" levenshtein="+c.to_string).lift;;
             continue_m $ ()
         )
     }
@@ -365,12 +365,12 @@ test_delete_chars = (
     do {
         loop_m(
             (), |_|
-            let _ = *eprintln("input word").lift;
+            eprintln("input word").lift;;
             let line = *read_line(IO::stdin);
             if line == "" { break_m $ () };
             let word = line.strip_spaces;
             let words = _delete_chars(2, word);
-            let _ = *words.foreach_m(eprintln).lift;
+            words.foreach_m(eprintln).lift;;
             continue_m $ ()
         )
     }
@@ -399,22 +399,22 @@ main = (
             let checker = *SpellChecker::from_word_list_file(
                 word_list_file
             );
-            let _ = *checker.save_dict_cache(dict_cache_file);
+            checker.save_dict_cache(dict_cache_file);;
             pure $ checker
         };
 
         loop_m(
             (), |_|
-            let _ = *print("Input word> ").lift;
-            let _ = *fflush(IO::stdout);
+            print("Input word> ").lift;;
+            fflush(IO::stdout);;
             let line = *read_line(IO::stdin);
             if line == "" { break_m $ () };
             let typemiss_word = line.strip_spaces;
             let words = checker.find_word(typemiss_word);
-            let _ = *println("Candidates are:").lift;
-            let _ = *words.foreach_m(|word|
+            println("Candidates are:").lift;;
+            words.foreach_m(|word|
                 println("  " + word)
-            ).lift;
+            ).lift;;
             continue_m $ ()
         )
     }

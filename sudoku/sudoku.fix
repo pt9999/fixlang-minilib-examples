@@ -117,11 +117,11 @@ impl Board: FromString {
         let lines = lines.to_array;
         // 9行9列であることを確認する。
         if lines.get_size != 9 { err $ "invalid row size" };
-        let _ = *lines.to_iter.fold_m(
+        lines.to_iter.fold_m(
             (), |line, _|
             if line.get_size != 9 { err $ "invalid col size" };
             ok()
-        );
+        );;
         // 盤面の各マスを読み込む。
         let board = Board::empty;
         Iterator::range(0, 9).fold_m(board, |row, board|
@@ -360,7 +360,7 @@ namespace Solver {
     _progress: Lazy String -> Solver -> IOFail ();
     _progress = |message, solver| (
         if !solver.@progress { pure() };
-        let _ = *println(message()).lift;
+        println(message()).lift;;
         fflush(IO::stdout)
     );
 
@@ -368,11 +368,11 @@ namespace Solver {
     solve_problem_and_print_solutions: BoardState -> Solver -> IOFail (Array BoardState);
     solve_problem_and_print_solutions = |state, solver| (
         let (solutions, step) = *solver.solve(state);
-        let _ = *println((solutions.get_size, step).format("{} 個の解が見つかりました。(ステップ数: {})")).lift;
-        eval *solutions.to_iter.fold_m(
+        println((solutions.get_size, step).format("{} 個の解が見つかりました。(ステップ数: {})")).lift;;
+        solutions.to_iter.fold_m(
             (), |state, _|
             println("\n" + state.to_string).lift
-        );
+        );;
         pure $ solutions
     );
 
@@ -399,11 +399,11 @@ namespace Solver {
             pure $ (solver.@solutions, solver.@step)
         };
         let (state, solver) = opt.as_some;
-        let _ = *solver._progress(|_| [state.@digit_count, solver.@stack.get_size].format("{}: _solve_inner: stack size={}"));
+        solver._progress(|_| [state.@digit_count, solver.@stack.get_size].format("{}: _solve_inner: stack size={}"));;
 
         //  9 x 9 個のマスがすべて埋まったら解を記録する。
         if state.@digit_count >= 9 * 9 {
-            let _ = *solver._progress(|_| [state.@digit_count].format("{}: 解が見つかりました"));
+            solver._progress(|_| [state.@digit_count].format("{}: 解が見つかりました"));;
             let solver = solver.mod_solutions(push_back(state));
             solver._solve_inner
         };
@@ -412,20 +412,20 @@ namespace Solver {
         let min_cell = state.@candidates.find_min_candidates_cell(state.@board);
         if min_cell.is_none {
             // 空のマスがない
-            let _ = *solver._progress(|_| [state.@digit_count].format("{}: 空のマスがありません"));
+            solver._progress(|_| [state.@digit_count].format("{}: 空のマスがありません"));;
             solver._solve_inner
         };
         let (num_cand, row, col) = min_cell.as_some;
         if num_cand == 0 {
             // 候補数が0のマスにはどの数字も配置できないため、その盤面は解にならない。
-            let _ = *solver._progress(|_| (state.@digit_count, row, col).format("{}: ({}, {}) に配置できる数字がありません"));
+            solver._progress(|_| (state.@digit_count, row, col).format("{}: ({}, {}) に配置できる数字がありません"));;
             solver._solve_inner
         };
 
         //  候補の各々について、その数字を配置した盤面を生成し、スタックに積む。
         let bitvec = state.@candidates.get_bitvec(row, col);
-        let _ = *solver._progress(|_| (state.@digit_count, (row, col), bitvec.to_iter.Iterator::map(to_string).join(","))
-                                .format("{}: {} に配置可能な数字: {}"));
+        solver._progress(|_| (state.@digit_count, (row, col), bitvec.to_iter.Iterator::map(to_string).join(","))
+                                .format("{}: {} に配置可能な数字: {}"));;
         let solver = bitvec.to_iter.fold(solver, |digit, solver|
             solver._push_stack(state.place_digit(row, col, digit))
         );
@@ -476,27 +476,27 @@ namespace Generator {
     // 数独の問題を作成し、唯一解を持つことを検証する。
     generate_and_validate: Generator -> IOFail BoardState;
     generate_and_validate = |gen| (
-        let _ = *gen._progress(|_| "問題を作成します");
+        gen._progress(|_| "問題を作成します");;
         //  すべての数字を配置した盤面をランダムに作成する。
         let board = *gen._generate_random_full_board;
         //  穴を空ける
         let state = *gen._make_holes(board);
         //  問題が唯一解を持つことを検証する
-        let _ = *gen._validate_solution(state);
+        gen._validate_solution(state);;
         pure $ state
     );
 
     // 数独の問題が唯一解を持つことを検証する。
     _validate_solution: BoardState -> Generator -> IOFail ();
     _validate_solution = |state, gen| (
-        let _ = *gen._progress(|_| "作成した問題を検証します");
+        gen._progress(|_| "作成した問題を検証します");;
         let res = *gen.@solver.solve(state).to_result.lift;
         if res.is_err {
             throw $ res.as_err
         };
         let (solutions, solve_step) = res.as_ok;
-        let _ = *gen._progress(|_| [solutions.get_size, solve_step, state.@digit_count]
-                    .format("検証結果: 解の数={} ステップ数={} 数字の数={}"));
+        gen._progress(|_| [solutions.get_size, solve_step, state.@digit_count]
+                    .format("検証結果: 解の数={} ステップ数={} 数字の数={}"));;
         if solutions.get_size == 0 {
             throw $ "解なし"
         };
@@ -510,7 +510,7 @@ namespace Generator {
     _progress: Lazy String -> Generator -> IOFail ();
     _progress = |message, gen| (
         if !gen.@progress { pure() };
-        let _ = *println(message()).lift;
+        println(message()).lift;;
         fflush(IO::stdout)
     );
 
@@ -518,10 +518,10 @@ namespace Generator {
     // f は乱数を生成する関数。
     _with_random: (Random -> (Random, a)) -> Generator -> IOFail a;
     _with_random = |f, gen| (
-        eval *pure();
+        pure();;
         gen.@var_random.lock(|random|
             let (random, a) = f(random);
-            let _ = *gen.@var_random.Var::set(random);
+            gen.@var_random.Var::set(random);;
             pure $ a
         ).lift
     );
@@ -560,10 +560,10 @@ namespace Generator {
                 // 穴を開けたら唯一解を持たなくなった
                 let retry = retry + 1;
                 if retry >= gen.@max_retry {
-                    let _ = *gen._progress(|_| (state.@digit_count, retry).format("{}: 穴空けの最大試行回数を超えました (retry={})"));
+                    gen._progress(|_| (state.@digit_count, retry).format("{}: 穴空けの最大試行回数を超えました (retry={})"));;
                     break_m $ state
                 };
-                //let _ = *gen._progress(|_| (state.@digit_count, retry).format("{}: 穴開けを再試行します (retry={})"));
+                //gen._progress(|_| (state.@digit_count, retry).format("{}: 穴開けを再試行します (retry={})"));;
                 continue_m $ (state, retry)
             };
             continue_m $ (new_state, 0)
@@ -861,9 +861,9 @@ run_command_generate = |submatches| (
     let gen = Generator::make(max_retry, min_digit_count, var_random, solver);
     let gen = gen.set_progress(verbose == "true");
     let problem: BoardState = *gen.generate_and_validate;
-    eval *println("\n問題:\n" + problem.to_string + "\n").lift;
+    println("\n問題:\n" + problem.to_string + "\n").lift;;
     let solutions = *gen.@solver.solve_problem_and_print_solutions(problem);
-    eval *write_problem_file(submatches, problem);
+    write_problem_file(submatches, problem);;
     pure()
 );
 
@@ -872,11 +872,11 @@ write_problem_file = |submatches, problem| (
     let output_path = submatches.get_one("output");
     if output_path.is_none { pure() };
     let output_path = output_path.as_some;
-    eval *write_file_string(output_path, problem.to_string);
+    write_file_string(output_path, problem.to_string);;
     let output_svg = submatches.get_one("svg").as_some == "true";
     if !output_svg { pure () };
     let output_svg_path = output_path + ".svg";
-    eval *write_board_to_svg_file(output_svg_path, problem);
+    write_board_to_svg_file(output_svg_path, problem);;
     pure()
 );
 

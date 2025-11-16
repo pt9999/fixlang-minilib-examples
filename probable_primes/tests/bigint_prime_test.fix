@@ -29,7 +29,7 @@ test_pow_by_U64 = (
         let a: BigInt = *from_string(a).from_result;
         let b: U64 = *from_string(b).from_result;
         let actual = pow_by_U64(a,b);
-        //let _ = *println((a, b, actual).format("pow_by_U64({},{})={}")).lift;
+        //println((a, b, actual).format("pow_by_U64({},{})={}")).lift;;
         assert_equal("eq", expect, actual.to_string)
     )
 );
@@ -56,7 +56,7 @@ test_modpow = (
         let b: BigInt = *from_string(b).from_result;
         let c: BigInt = *from_string(c).from_result;
         let actual = modpow(a,b,c);
-        //let _ = *println((a, b, c, actual).format("pow_by_U64({},{},{})={}")).lift;
+        //println((a, b, c, actual).format("pow_by_U64({},{},{})={}")).lift;;
         assert_equal("eq", expect, actual.to_string)
     )
 );
@@ -74,7 +74,7 @@ test_gcd = (
         let a: BigInt = *from_string(a).from_result;
         let b: BigInt = *from_string(b).from_result;
         let actual = gcd(a,b);
-        //let _ = *println((a, b, actual).format("gcd({},{})={}")).lift;
+        //println((a, b, actual).format("gcd({},{})={}")).lift;;
         assert_equal("eq", expect, actual.to_string)
     )
 );
@@ -98,7 +98,7 @@ test_jacobi_symbol = (
         let m: BigInt = *from_string(m).from_result;
         let n: BigInt = *from_string(n).from_result;
         let actual = jacobi_symbol(m,n);
-        //let _ = *println((m, n, actual).format("jacobi_symbol({},{})={}")).lift;
+        //println((m, n, actual).format("jacobi_symbol({},{})={}")).lift;;
         assert_equal("eq", expect, actual)
     )
 );

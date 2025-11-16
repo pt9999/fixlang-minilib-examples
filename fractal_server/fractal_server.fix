@@ -76,7 +76,7 @@ render_png_image = |param| (
     let yrange = (param.@y0, param.@y1);
     let loop_max = param.@loop_max;
     let render_scanline: I64 -> IO (Array (U8, U8, U8)) = |y| (
-        let _ = *pure();
+        pure();;
         let im = y.to_F64 / height.to_F64 * (yrange.@1 - yrange.@0) + yrange.@0;
         pure $ Array::from_map(width, |x|
             let re = x.to_F64 / width.to_F64  * (xrange.@1 - xrange.@0) + xrange.@0;
@@ -88,7 +88,7 @@ render_png_image = |param| (
     let task_pool = *TaskPool::make(number_of_processors).lift;
     let scanlines = *Iterator::range(0, height).to_array
                      .parallel_map_m(task_pool, render_scanline);
-    let _ = *task_pool.shutdown.lift;
+    task_pool.shutdown.lift;;
 
     let image = Image::make(width, height, "RGB");
     let image = loop(
@@ -117,7 +117,7 @@ type AppState = unbox struct {
 namespace AppState {
     initialize: IOFail (Var AppState);
     initialize = (
-        let _ = *pure();    // make it lazy
+        pure();;    // make it lazy
         let args = *IO::get_args.lift;
         let app_dir = if args.get_size > 0 { dirname(args.@(0)) } else { "." };
         let asset_dir = join_paths([app_dir, "assets/"]);
