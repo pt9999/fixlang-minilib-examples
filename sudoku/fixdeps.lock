@@ -47,12 +47,12 @@ rev = "fd75a6634ec0c919f2d1703112d25da9a3c2346e"
 
 [[dependencies]]
 name = "minilib-monad"
-version = "0.7.0"
-path = ".fixlang/deps/minilib-monad_0.7.0"
+version = "0.7.1"
+path = ".fixlang/deps/minilib-monad_0.7.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-monad.git"
-rev = "d47fd63f16bf75bd20fef85e1a1256edc4d1e01f"
+rev = "46d9819fed0c62be086785d23366c6013de2b1ff"
 
 [[dependencies]]
 name = "asynctask"
