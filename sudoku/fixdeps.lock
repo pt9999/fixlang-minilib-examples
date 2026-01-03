@@ -119,12 +119,12 @@ rev = "6181e80f3dcbdae80d4663bf9fd8d31200004d6f"
 
 [[dependencies]]
 name = "minilib-media"
-version = "0.5.7"
-path = ".fixlang/deps/minilib-media_0.5.7"
+version = "0.5.8"
+path = ".fixlang/deps/minilib-media_0.5.8"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-media.git"
-rev = "0143fed4bd91fe8c24320651ad25fe1943b29549"
+rev = "eb24f108acb43bd7f66b6afba7963592cb3cfe76"
 
 [[dependencies]]
 name = "math"
