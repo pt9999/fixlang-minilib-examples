@@ -56,30 +56,30 @@ rev = "7af8a5c115e7437f94dcb4353807c03d816856f6"
 
 [[dependencies]]
 name = "minilib-net"
-version = "0.6.4"
-path = ".fixlang/deps/minilib-net_0.6.4"
+version = "0.6.6"
+path = ".fixlang/deps/minilib-net_0.6.6"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-net.git"
-rev = "46ceac38efb180a3227c505cee95f4c84131bba7"
+rev = "2e5c86107ccc8f82298c89d1b2df31878dfa6850"
 
 [[dependencies]]
 name = "asynctask"
-version = "1.1.3"
-path = ".fixlang/deps/asynctask_1.1.3"
+version = "1.1.4"
+path = ".fixlang/deps/asynctask_1.1.4"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-asynctask.git"
-rev = "a8ee401d0f0dd48e696a872a30a408cbf8fccce0"
+rev = "b9ea025db98fce8ebb2b05623320b2404c9f3879"
 
 [[dependencies]]
 name = "minilib-xml"
-version = "0.5.4"
-path = ".fixlang/deps/minilib-xml_0.5.4"
+version = "0.5.5"
+path = ".fixlang/deps/minilib-xml_0.5.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-xml.git"
-rev = "4fcfb6b4fec761b9e7fa7625c72bb55d31d2235e"
+rev = "185b56d0ed4f35e9bc117aec080495d50a54cc65"
 
 [[dependencies]]
 name = "minilib-binary"
@@ -92,18 +92,18 @@ rev = "d9737499faa2f38e21df22d7649d4c1edfdb66a5"
 
 [[dependencies]]
 name = "minilib-text"
-version = "0.5.5"
-path = ".fixlang/deps/minilib-text_0.5.5"
+version = "0.6.0"
+path = ".fixlang/deps/minilib-text_0.6.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-text.git"
-rev = "7c83c54bd391004da967ff29899e22b63c20c25c"
+rev = "6181e80f3dcbdae80d4663bf9fd8d31200004d6f"
 
 [[dependencies]]
 name = "minilib-io"
-version = "0.6.6"
-path = ".fixlang/deps/minilib-io_0.6.6"
+version = "0.6.7"
+path = ".fixlang/deps/minilib-io_0.6.7"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "8fe86c69bb06031aa4f8d8f0fdfc2481ec5dbcdc"
+rev = "20626b0e3a66bcb4b654f6a05069a501d545bfbb"
