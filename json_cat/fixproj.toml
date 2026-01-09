@@ -1,6 +1,9 @@
 [general]
 name = "json-cat"
 version = "0.1.0"
+fix_version = "1.2.0"
+authors = ["pt9999"]
+license = "MIT"
 
 [build]
 output = "json_cat.out"
