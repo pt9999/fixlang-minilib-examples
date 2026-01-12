@@ -28,13 +28,22 @@ repo = "https://github.com/pt9999/fixlang-minilib-random.git"
 rev = "8b19000fae4e33aa674613366089b46819b10afb"
 
 [[dependencies]]
+name = "minilib-monad"
+version = "0.7.6"
+path = ".fixlang/deps/minilib-monad_0.7.6"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-monad.git"
+rev = "7152a73682c26297ae2786729a03e707312457ab"
+
+[[dependencies]]
 name = "minilib-common"
-version = "0.8.2"
-path = ".fixlang/deps/minilib-common_0.8.2"
+version = "0.9.0"
+path = ".fixlang/deps/minilib-common_0.9.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "17326cfc04df39190b71ae85d3cb6a08a7f57948"
+rev = "8c56f86f6e9889a13327c562f75c16358517427f"
 
 [[dependencies]]
 name = "character"
@@ -44,15 +53,6 @@ path = ".fixlang/deps/character_1.0.1"
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-character.git"
 rev = "fd75a6634ec0c919f2d1703112d25da9a3c2346e"
-
-[[dependencies]]
-name = "minilib-monad"
-version = "0.7.6"
-path = ".fixlang/deps/minilib-monad_0.7.6"
-
-[dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-monad.git"
-rev = "7152a73682c26297ae2786729a03e707312457ab"
 
 [[dependencies]]
 name = "asynctask"
@@ -137,9 +137,9 @@ rev = "663bdee5f5ee2824e9e139cfdb097d6e56a4b1bb"
 
 [[dependencies]]
 name = "minilib-io"
-version = "0.6.8"
-path = ".fixlang/deps/minilib-io_0.6.8"
+version = "0.6.11"
+path = ".fixlang/deps/minilib-io_0.6.11"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "7c404892ff7f89076716894770ab037f2d876099"
+rev = "99445f38784c92f9fa721816d9d75caf3fbce74a"
