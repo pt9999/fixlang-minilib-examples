@@ -2,12 +2,12 @@ proj_file_hash = "f8c5373734bf425a931bc57522d72592"
 
 [[dependencies]]
 name = "minilib-app"
-version = "0.5.5"
-path = ".fixlang/deps/minilib-app_0.5.5"
+version = "0.6.1"
+path = ".fixlang/deps/minilib-app_0.6.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "5c3257f411c1928f1d5253be93e691442c48be0e"
+rev = "2791ec50d0ad3a94d3819f3d2958e677621ccca1"
 
 [[dependencies]]
 name = "hashmap"
@@ -101,9 +101,9 @@ rev = "cb21142d4eb55a2bdfc8ae65c0dba3b5aeaef30b"
 
 [[dependencies]]
 name = "minilib-io"
-version = "0.6.11"
-path = ".fixlang/deps/minilib-io_0.6.11"
+version = "0.6.12"
+path = ".fixlang/deps/minilib-io_0.6.12"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "99445f38784c92f9fa721816d9d75caf3fbce74a"
+rev = "bb31f9d334021821537ec500f7b758ba8179a2b4"
