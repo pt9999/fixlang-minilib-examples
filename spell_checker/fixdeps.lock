@@ -37,22 +37,40 @@ repo = "https://github.com/tttmmmyyyy/fixlang-hashset.git"
 rev = "c1bc85997716a1d96a830be0cd5ecccb2227df9d"
 
 [[dependencies]]
+name = "minilib-app"
+version = "0.7.0"
+path = ".fixlang/deps/minilib-app_0.7.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-app.git"
+rev = "3ffa965ff557f192aed052cb7aaaff626081d703"
+
+[[dependencies]]
 name = "minilib-binary"
-version = "0.5.6"
-path = ".fixlang/deps/minilib-binary_0.5.6"
+version = "0.6.0"
+path = ".fixlang/deps/minilib-binary_0.6.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-binary.git"
-rev = "ed5869111d41ad35f2fef7f2652cf9631f3875f7"
+rev = "68b80a76753853bab4b6cbb88aea8bc716e80c05"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.11.4"
-path = ".fixlang/deps/minilib-common_0.11.4"
+version = "0.12.0"
+path = ".fixlang/deps/minilib-common_0.12.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "6f8f5600359c7819e68f8e673a4270938a431ac1"
+rev = "b618c599f408f3b3d83b138475059d7563115915"
+
+[[dependencies]]
+name = "minilib-io"
+version = "0.8.0"
+path = ".fixlang/deps/minilib-io_0.8.0"
+
+[dependencies.git]
+repo = "https://github.com/pt9999/fixlang-minilib-io.git"
+rev = "c9a65435c8b70d1fdbd7100b494591a673a515e5"
 
 [[dependencies]]
 name = "time"
@@ -62,30 +80,3 @@ path = ".fixlang/deps/time_1.0.2"
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-time.git"
 rev = "7af8a5c115e7437f94dcb4353807c03d816856f6"
-
-[[dependencies]]
-name = "minilib-app"
-version = "0.6.2"
-path = ".fixlang/deps/minilib-app_0.6.2"
-
-[dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "9fced3d94debb0c2621d92dfa3a0c430b13aca61"
-
-[[dependencies]]
-name = "minilib-io"
-version = "0.7.2"
-path = ".fixlang/deps/minilib-io_0.7.2"
-
-[dependencies.git]
-repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "0c43fda85a10c2b6808578b9e2b2948ad7e8de13"
-
-[[dependencies]]
-name = "asynctask"
-version = "1.1.5"
-path = ".fixlang/deps/asynctask_1.1.5"
-
-[dependencies.git]
-repo = "https://github.com/tttmmmyyyy/fixlang-asynctask.git"
-rev = "a18fb87a2e47cc19cf263a4311704e88880dc2c8"

@@ -1,15 +1,6 @@
 proj_file_hash = "fc00950ab3a3d279ce051a4d67317d69"
 
 [[dependencies]]
-name = "regexp"
-version = "1.1.1"
-path = ".fixlang/deps/regexp_1.1.1"
-
-[dependencies.git]
-repo = "https://github.com/tttmmmyyyy/fixlang-regexp.git"
-rev = "b8b024a40385d6825d0b84b61fe540e1a92c20ec"
-
-[[dependencies]]
 name = "character"
 version = "1.0.1"
 path = ".fixlang/deps/character_1.0.1"
@@ -17,15 +8,6 @@ path = ".fixlang/deps/character_1.0.1"
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-character.git"
 rev = "fd75a6634ec0c919f2d1703112d25da9a3c2346e"
-
-[[dependencies]]
-name = "hashmap"
-version = "1.1.4"
-path = ".fixlang/deps/hashmap_1.1.4"
-
-[dependencies.git]
-repo = "https://github.com/tttmmmyyyy/fixlang-hashmap.git"
-rev = "dd5d159216905fccdf4a01944c088f9064f5640b"
 
 [[dependencies]]
 name = "hash"
@@ -37,22 +19,40 @@ repo = "https://github.com/tttmmmyyyy/fixlang-hash.git"
 rev = "145a20913eb9c280edd616d5b9977d33303343c1"
 
 [[dependencies]]
+name = "hashmap"
+version = "1.1.4"
+path = ".fixlang/deps/hashmap_1.1.4"
+
+[dependencies.git]
+repo = "https://github.com/tttmmmyyyy/fixlang-hashmap.git"
+rev = "dd5d159216905fccdf4a01944c088f9064f5640b"
+
+[[dependencies]]
 name = "minilib-app"
-version = "0.6.2"
-path = ".fixlang/deps/minilib-app_0.6.2"
+version = "0.7.0"
+path = ".fixlang/deps/minilib-app_0.7.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "9fced3d94debb0c2621d92dfa3a0c430b13aca61"
+rev = "3ffa965ff557f192aed052cb7aaaff626081d703"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.11.4"
-path = ".fixlang/deps/minilib-common_0.11.4"
+version = "0.12.0"
+path = ".fixlang/deps/minilib-common_0.12.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "6f8f5600359c7819e68f8e673a4270938a431ac1"
+rev = "b618c599f408f3b3d83b138475059d7563115915"
+
+[[dependencies]]
+name = "regexp"
+version = "1.1.1"
+path = ".fixlang/deps/regexp_1.1.1"
+
+[dependencies.git]
+repo = "https://github.com/tttmmmyyyy/fixlang-regexp.git"
+rev = "b8b024a40385d6825d0b84b61fe540e1a92c20ec"
 
 [[dependencies]]
 name = "time"
