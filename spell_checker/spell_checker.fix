@@ -45,7 +45,7 @@ namespace SpellChecker {
     from_word_list_file = |filepath| (
         eprintln("loading word list file...").lift;;
         // IO::read_file_string() sometimes freezes
-        let word_lists = (*_read_file_bytes_ex(filepath))._unsafe_to_string;
+        let word_lists = (*_read_file_bytes_ex(filepath)).StringEx::from_array;
         eprintln("registering word list...").lift;;
         let (checker, time) = consumed_time_while_lazy (|_|
             from_word_list_file_contents(word_lists)
@@ -155,7 +155,7 @@ namespace SpellChecker {
     _delete_chars_inner: I64 -> I64 -> String -> Array U8 -> Array String -> Array String;
     _delete_chars_inner = |start, k, str, buf, output| (
         if start >= str.get_size {
-            output.push_back(buf._unsafe_to_string)
+            output.push_back(buf.StringEx::from_array)
         };
 
         let output = if k > 0 {
@@ -304,7 +304,7 @@ namespace DictCache {
             let c = array.@(pos);
             let output = output.push_back(c);
             if c == 0_U8 {
-                let str = output._unsafe_to_string;
+                let str = output.StringEx::from_array;
                 break $ (str, pos + 1)
             };
             continue $ (output, pos + 1)

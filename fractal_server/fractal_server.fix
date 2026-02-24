@@ -134,7 +134,7 @@ namespace AppState {
     on_get_index = |app_state_var, req, res| (
         let app_state = *app_state_var.get.lift;
         let content = *read_file_bytes(app_state.@html_path);
-        let content = content._unsafe_to_string;
+        let content = content.StringEx::from_array;
         res.content_type("html").write_str(content)
     );
 
