@@ -20,12 +20,12 @@ rev = "145a20913eb9c280edd616d5b9977d33303343c1"
 
 [[dependencies]]
 name = "hashmap"
-version = "1.1.4"
-path = ".fixlang/deps/hashmap_1.1.4"
+version = "1.2.0"
+path = ".fixlang/deps/hashmap_1.2.0"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-hashmap.git"
-rev = "dd5d159216905fccdf4a01944c088f9064f5640b"
+rev = "a7cb58fef24d0cf11ba305faf4f764dca72ecc45"
 
 [[dependencies]]
 name = "minilib-app"
@@ -38,12 +38,12 @@ rev = "cd733a9f64bdc36388d7ccaf835524bcf1ee8af4"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.12.3"
-path = ".fixlang/deps/minilib-common_0.12.3"
+version = "0.12.4"
+path = ".fixlang/deps/minilib-common_0.12.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "e3751a7443234275c64bf6aafb2645c26f9363a1"
+rev = "a7e6aa2778fd6678e51f454b59aca90f0bb0898c"
 
 [[dependencies]]
 name = "regexp"
