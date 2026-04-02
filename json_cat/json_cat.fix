@@ -10,7 +10,7 @@ import Minilib.Text.SimpleParser;
 
 perf_decode: I64 -> String -> Result ErrMsg Json;
 perf_decode = |count, text| (
-    let (res, consumed_time) = ().consumed_time_while(|_|
+    let (res, consumed_time) = consumed_time_while_lazy(|_|
         Iterator::count_up(0).take(count).fold(
             ok $ null(), |_,_|
             JsonDecoder::decode(text)
