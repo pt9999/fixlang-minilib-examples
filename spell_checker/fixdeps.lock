@@ -29,12 +29,12 @@ rev = "a7cb58fef24d0cf11ba305faf4f764dca72ecc45"
 
 [[dependencies]]
 name = "hashset"
-version = "1.1.3"
-path = ".fixlang/deps/hashset_1.1.3"
+version = "1.2.1"
+path = ".fixlang/deps/hashset_1.2.1"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-hashset.git"
-rev = "c1bc85997716a1d96a830be0cd5ecccb2227df9d"
+rev = "37684154baa9537436b5264613544bf0939e60ae"
 
 [[dependencies]]
 name = "minilib-app"

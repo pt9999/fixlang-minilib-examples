@@ -47,12 +47,12 @@ rev = "a7e6aa2778fd6678e51f454b59aca90f0bb0898c"
 
 [[dependencies]]
 name = "regexp"
-version = "1.1.1"
-path = ".fixlang/deps/regexp_1.1.1"
+version = "1.1.2"
+path = ".fixlang/deps/regexp_1.1.2"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-regexp.git"
-rev = "b8b024a40385d6825d0b84b61fe540e1a92c20ec"
+rev = "4a475d2898112eb3f29a4ddc4bdfa32a7151eecb"
 
 [[dependencies]]
 name = "time"

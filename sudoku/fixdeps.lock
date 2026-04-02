@@ -1,4 +1,4 @@
-proj_file_hash = "40a4c2f7cbf3c28715901182cf7580d7"
+proj_file_hash = "f407ba0223e310916ae2d0484f37360d"
 
 [[dependencies]]
 name = "asynctask"
@@ -92,12 +92,12 @@ rev = "e4932f3ca2cebcf68a3f9bfb0e340e6ca29dbdf5"
 
 [[dependencies]]
 name = "minilib-random"
-version = "0.1.5"
-path = ".fixlang/deps/minilib-random_0.1.5"
+version = "0.7.1"
+path = ".fixlang/deps/minilib-random_0.7.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-random.git"
-rev = "8b19000fae4e33aa674613366089b46819b10afb"
+rev = "787beeb2bc880c82a1a9f3b0ae4781a6854552f4"
 
 [[dependencies]]
 name = "minilib-text"
