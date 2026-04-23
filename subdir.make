@@ -2,10 +2,12 @@
 
 .PHONY: all build clean update-deps
 
+BUILD_OPTS = $(if $(CIENV), --allow-preliminary-commands, )
+
 all: build
 
 build:
-	fix build
+	fix build $(BUILD_OPTS)
 
 clean:
 	fix clean
