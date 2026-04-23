@@ -1,4 +1,4 @@
-proj_file_hash = "fc00950ab3a3d279ce051a4d67317d69"
+proj_file_hash = "59791c44bdb757c7abe2db111facc260"
 
 [[dependencies]]
 name = "character"
@@ -29,21 +29,21 @@ rev = "a7cb58fef24d0cf11ba305faf4f764dca72ecc45"
 
 [[dependencies]]
 name = "minilib-app"
-version = "0.7.1"
-path = ".fixlang/deps/minilib-app_0.7.1"
+version = "0.7.2"
+path = ".fixlang/deps/minilib-app_0.7.2"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "cd733a9f64bdc36388d7ccaf835524bcf1ee8af4"
+rev = "8deec6cdd3816209c0fe7d3f11e1f73a3e6ce6ec"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.12.4"
-path = ".fixlang/deps/minilib-common_0.12.4"
+version = "0.13.0"
+path = ".fixlang/deps/minilib-common_0.13.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "a7e6aa2778fd6678e51f454b59aca90f0bb0898c"
+rev = "d8af3860a44a3ab19ddf6a39c809b959821cbe98"
 
 [[dependencies]]
 name = "regexp"
