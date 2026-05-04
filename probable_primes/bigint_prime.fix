@@ -95,8 +95,8 @@ namespace PrimeGen {
     probable_prime: I64 -> PrimeGen -> IO BigInt;
     probable_prime = |bit_length, prime_gen| (
         assert(|_| "invalid bit_length", bit_length >= 1);;
-        let begin: BigInt = one.shift_left((bit_length - 1).to_U64);
-        let end: BigInt = one.shift_left(bit_length.to_U64);
+        let begin: BigInt = one.shift_left((bit_length - 1).u64);
+        let end: BigInt = one.shift_left(bit_length.u64);
         let n = *prime_gen.generate_bigint_range(begin, end);
         let n = *prime_gen.next_probable_prime(n);
         if begin <= n && n < end {
@@ -112,7 +112,7 @@ namespace PrimeGen {
         let ret = *prime_gen.miller_rabin(n);
         if !ret {
             //let id = n.to_string;
-            //let id = id.get_sub(id.get_size - 3, id.get_size);
+            //let id = id.get_sub(id.@size - 3, id.@size);
             prime_gen._progress("M");;
             prime_gen.next_probable_prime(n + one)
         };
@@ -142,9 +142,9 @@ namespace PrimeGen {
     _is_weak_probable_prime = |n, prime_gen| (
         pure();;
         //let id = n.to_string;
-        //let id = id.get_sub(id.get_size - 3, id.get_size);
+        //let id = id.get_sub(id.@size - 3, id.@size);
         //let id = (*FFI_CALL_IO[I32 pthread_self()]).to_string;
-        //let id = id.get_sub(id.get_size - 3, id.get_size);
+        //let id = id.get_sub(id.@size - 3, id.@size);
         let id = "";
         if !check_for_small_primes(n) {
             prime_gen._progress("."+id);;
@@ -171,7 +171,7 @@ namespace PrimeGen {
     check_for_small_primes: BigInt -> Bool;
     check_for_small_primes = |n| (
         let (_, rem) = divmod(n, BigInt::from_I64(2*3*5*7));
-        let rem = rem.to_I64;
+        let rem = rem.i64;
         if rem % 2 == 0 || rem % 3 == 0 || rem % 5 == 0 || rem % 7 == 0 {
             // `n` is surely composite
             false
@@ -212,7 +212,7 @@ namespace PrimeGen {
         let (s, d) = loop(
             (0, n_minus_one), |(s, d)|
             let (quo, rem) = divmod(d, BigInt::two);
-            if rem.to_I64 != 0 {
+            if rem.i64 != 0 {
                 break $ (s, d)
             };
             continue $ (s+1, quo)

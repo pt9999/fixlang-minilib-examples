@@ -63,7 +63,7 @@ calc_pi_f64 = |_| (
 
 calc_pi_bf: I64 -> BigFloat;
 calc_pi_bf = |prec10| (
-    let prec = Math::ceil(prec10.to_F64 / Math::log10(2.0)).to_I64;
+    let prec = Math::ceil(prec10.f64 / Math::log10(2.0)).i64;
     let a = BigFloat::from_F64(1.0).set_prec(prec);
     let b = BigFloat::from_F64(1.0 / 2.0).set_prec(prec).sqrt;
     let t = BigFloat::from_F64(1.0 / 4.0).set_prec(prec);

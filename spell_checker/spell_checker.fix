@@ -52,9 +52,9 @@ namespace SpellChecker {
         );
         eprintln("registering time=" + time.to_string).lift;;
         /*
-        eprintln("deleted count=" + checker.@symspell.get_size.to_string).lift;;
+        eprintln("deleted count=" + checker.@symspell.@size.to_string).lift;;
         let (count, time) = consumed_time_while_lazy (|_|
-            checker.@symspell.to_iter.fold(0, |(k, words), n| n + words.get_size)
+            checker.@symspell.to_iter.fold(0, |(k, words), n| n + words.@size)
         );
         eprintln("word count=" + count.to_string).lift;;
         eprintln("word count time=" + time.to_string).lift;;
@@ -137,7 +137,7 @@ namespace SpellChecker {
 
     _max_delete_char_count: String -> I64;
     _max_delete_char_count = |word| (
-        let n = word.get_size;
+        let n = word.@size;
         if n < 3      { 0 }
         else if n < 5 { 1 }
         else          { 2 }
@@ -146,7 +146,7 @@ namespace SpellChecker {
     // delete at most `k` characters from a string
     _delete_chars: I64 -> String -> Array String;
     _delete_chars = |k, str| (
-        let n = str.get_size;
+        let n = str.@size;
         let buf = Array::empty(n + 1);
         let output = Array::empty(100);
         _delete_chars_inner(0, k, str, buf, output)
@@ -154,7 +154,7 @@ namespace SpellChecker {
 
     _delete_chars_inner: I64 -> I64 -> String -> Array U8 -> Array String -> Array String;
     _delete_chars_inner = |start, k, str, buf, output| (
-        if start >= str.get_size {
+        if start >= str.@size {
             output.push_back(buf.StringEx::from_array)
         };
 
@@ -167,8 +167,8 @@ namespace SpellChecker {
 
     levenshtein: String -> String -> I64;
     levenshtein = |str1, str2| (
-        let n1 = str1.get_size;
-        let n2 = str2.get_size;
+        let n1 = str1.@size;
+        let n2 = str2.@size;
         let bytes1 = str1.get_bytes;
         let bytes2 = str2.get_bytes;
         let arr = Array::fill((n1 + 1) * (n2 + 1), I64::maximum);
@@ -249,16 +249,16 @@ namespace DictCache {
 
     write_U64: U64 -> ByteBuffer -> ByteBuffer;
     write_U64 = |u64, buf| (
-        let i = buf.get_size;
+        let i = buf.@size;
         buf.push_back_zeros(8).set_u64(i, u64)
     );
 
     write_string: String -> ByteBuffer -> ByteBuffer;
     write_string = |str, buf| (
-        let n = str.get_size;
+        let n = str.@size;
         let bytes = str.get_bytes;
         assert_lazy (|_| "invalid bytes", bytes.@(n) == '\0') $ |_|
-        let i = buf.get_size;
+        let i = buf.@size;
         buf.mod_array(|arr|
             loop(
                 (arr, 0), |(arr, i)|
@@ -271,7 +271,7 @@ namespace DictCache {
     write_words: [iter: Iterator, Item iter = String] iter -> ByteBuffer -> ByteBuffer;
     write_words = |iter, buf| (
         let size = iter.fold(0, |_, size| size + 1);
-        let buf = buf.write_U64(size.to_U64);
+        let buf = buf.write_U64(size.u64);
         let buf = iter.fold(buf, |word, buf|
             buf.write_string(word)
         );
@@ -282,7 +282,7 @@ namespace DictCache {
     write_symspell = |map, buf| (
         let iter = map.to_iter;
         let size = iter.fold(0, |_, size| size + 1);
-        let buf = buf.write_U64(size.to_U64);
+        let buf = buf.write_U64(size.u64);
         let buf = iter.fold(buf, |(deleted, words), buf|
             let buf = buf.write_string(deleted);
             buf.write_words(words.to_iter)
@@ -314,12 +314,12 @@ namespace DictCache {
     read_words: I64 -> ByteBuffer -> (Array String, I64);
     read_words = |pos, buf| (
         let (size, pos) = buf.read_U64(pos);
-        let size = size.to_I64;
+        let size = size.i64;
 
         let words = Array::empty(size);
         loop(
             (words, pos), |(words, pos)|
-            if words.get_size >= size { break $ (words, pos) };
+            if words.@size >= size { break $ (words, pos) };
             let (word, pos) = buf.read_string(pos);
             let words = words.push_back(word);
             continue $ (words, pos)
@@ -329,11 +329,11 @@ namespace DictCache {
     read_symspell: I64 -> ByteBuffer -> (HashMap String (Array String), I64);
     read_symspell = |pos, buf| (
         let (size, pos) = buf.read_U64(pos);
-        let size = size.to_I64;
+        let size = size.i64;
         let map = HashMap::empty(size);
         loop(
             (map, pos), |(map, pos)|
-            if map.get_size >= size { break $ (map, pos) };
+            if map.@size >= size { break $ (map, pos) };
             let (key, pos) = buf.read_string(pos);
             let (words, pos) = buf.read_words(pos);
             let map = map.insert(key, words);

@@ -162,8 +162,8 @@ chat_input_task = |bufsock, member, room| (
         //eprintln("recv start").lift;;
         let (line, bufsock) = *bufsock.read_line;
         //usleep(1000_U32);;
-        //eprintln("read_line end: size=" + line.get_size.to_string).lift;;
-        if line.get_size == 0 {
+        //eprintln("read_line end: size=" + line.@size.to_string).lift;;
+        if line.@size == 0 {
             eprintln("chat session end").lift;;
             room.mod(send_event_to_all(ChatEvent::message("SYSTEM: " + name + " has logged out\n"))).lift;;
             room.mod(send_event_to_member(member_id, ChatEvent::disconnect())).lift;;

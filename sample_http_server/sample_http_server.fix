@@ -105,7 +105,7 @@ namespace AppState {
     initialize = (
         pure();;    // make it lazy
         let args = *IO::get_args.lift;
-        let app_dir = if args.get_size > 0 { dirname(args.@(0)) } else { "." };
+        let app_dir = if args.@size > 0 { dirname(args.@(0)) } else { "." };
         let asset_dir = join_paths([app_dir, "assets/"]);
         let state = AppState {
             asset_dir: asset_dir,

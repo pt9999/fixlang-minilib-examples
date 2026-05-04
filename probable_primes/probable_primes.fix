@@ -35,7 +35,7 @@ generate_probable_primes = |p| (
     println((p.@begin_bits, p.@end_bits).format("This program generates probable primes of {} bit to {} bit."));;
     println("It may take several minutes. Please be patient.");;
     println("");;
-    let random = Random::init_by_seed(p.@seed.to_U64);
+    let random = Random::init_by_seed(p.@seed.u64);
     let prime_gen = *PrimeGen::make(random, p.@progress);
     loop_m(
         p.@begin_bits, |bit_length|
@@ -62,7 +62,7 @@ main = (
     do {
         set_unbuffered_mode(IO::stdout).lift;;
         let time = *Time::get_now.lift;
-        let time = time.to_F64.to_I64;
+        let time = time.to_F64.i64;
 
         let matches = *command.get_matches;
         let param = Param {

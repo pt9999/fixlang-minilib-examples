@@ -34,7 +34,7 @@ process_files = |regexp, input_files| (
     };
     input_files.to_iter.foreach_m(
         |input_file|
-        let filename = if input_files.get_size >= 2 {
+        let filename = if input_files.@size >= 2 {
             some(input_file)
         } else {
             none()

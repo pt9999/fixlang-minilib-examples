@@ -117,10 +117,10 @@ impl Board: FromString {
         // イテレータから配列に変換する。
         let lines = lines.to_array;
         // 9行9列であることを確認する。
-        if lines.get_size != 9 { err $ "invalid row size" };
+        if lines.@size != 9 { err $ "invalid row size" };
         lines.to_iter.foreach_m(
             |line|
-            if line.get_size != 9 { err $ "invalid col size" };
+            if line.@size != 9 { err $ "invalid col size" };
             ok()
         );;
         // 盤面の各マスを読み込む。
@@ -167,13 +167,13 @@ namespace BitVec {
 
     // i 番目のビットを取得する。
     get_bit: I64 -> BitVec -> Bool;
-    get_bit = |i, vec| vec.bit_and(1_U16.shift_left(i.to_U16)) != 0_U16;
+    get_bit = |i, vec| vec.bit_and(1_U16.shift_left(i.u16)) != 0_U16;
 
     // i 番目のビットを設定する。
     set_bit: I64 -> Bool -> BitVec -> BitVec;
     set_bit = |i, b, vec| (
-        if b { vec.bit_or(1_U16.shift_left(i.to_U16)) }
-        else { vec.bit_and(1_U16.shift_left(i.to_U16).bit_xor(0xffff_U16)) }
+        if b { vec.bit_or(1_U16.shift_left(i.u16)) }
+        else { vec.bit_and(1_U16.shift_left(i.u16).bit_xor(0xffff_U16)) }
     );
 
     // 配置可能な候補の数を求める。
@@ -184,7 +184,7 @@ namespace BitVec {
         let vec = vec.shift_right(2_U16).bit_and(0x3333_U16) + vec.bit_and(0x3333_U16);
         let vec = vec.shift_right(4_U16).bit_and(0x0f0f_U16) + vec.bit_and(0x0f0f_U16);
         let vec = vec.shift_right(8_U16).bit_and(0x00ff_U16) + vec.bit_and(0x00ff_U16);
-        vec.to_I64
+        vec.i64
     );
 
     // 配置可能な数字のイテレータを返す。
@@ -254,7 +254,7 @@ namespace Candidates {
             Iterator::range(0, 9).fold(cand, |col, cand|
                 let digit = board.get_digit(row, col);
                 if digit.is_none { cand };
-                let digit = digit.as_some.to_I64;
+                let digit = digit.as_some.i64;
                 assert_lazy(|_| (digit, (row, col)).format("could not place {} at {}"),
                     cand.get_bitvec(row, col).get_bit(digit) == true
                 ) $ |_|
@@ -323,7 +323,7 @@ namespace BoardState {
     place_digit: I64 -> I64 -> I64 -> BoardState -> BoardState;
     place_digit = |row, col, digit, state| (
         assert_lazy(|_| "digit is already set", state.@board.get_digit(row, col).is_none) $ |_|
-        state.mod_board(set_digit(row, col, some(digit.to_U8)))
+        state.mod_board(set_digit(row, col, some(digit.u8)))
              .mod_candidates(mod_all(row, col, set_bit(digit, false)))
              .mod_digit_count(add(1))
     );
@@ -369,7 +369,7 @@ namespace Solver {
     solve_problem_and_print_solutions: BoardState -> Solver -> IOFail (Array BoardState);
     solve_problem_and_print_solutions = |state, solver| (
         let (solutions, step) = *solver.solve(state);
-        println((solutions.get_size, step).format("{} 個の解が見つかりました。(ステップ数: {})")).lift;;
+        println((solutions.@size, step).format("{} 個の解が見つかりました。(ステップ数: {})")).lift;;
         solutions.to_iter.foreach_m(|state| println("\n" + state.to_string)).lift;;
         pure $ solutions
     );
@@ -388,7 +388,7 @@ namespace Solver {
     _solve_inner = |solver| (
         let solver = solver.mod_step(add(1));
         if solver.@step > solver.@max_step { throw $ "最大ステップ数を超えました" };
-        if solver.@solutions.get_size > solver.@max_solutions { throw $ "解の最大個数を超えました" };
+        if solver.@solutions.@size > solver.@max_solutions { throw $ "解の最大個数を超えました" };
 
         //  スタックから盤面状態を1つ取り出す。
         let opt = solver._pop_stack;
@@ -397,7 +397,7 @@ namespace Solver {
             pure $ (solver.@solutions, solver.@step)
         };
         let (state, solver) = opt.as_some;
-        solver._progress(|_| [state.@digit_count, solver.@stack.get_size].format("{}: _solve_inner: stack size={}"));;
+        solver._progress(|_| [state.@digit_count, solver.@stack.@size].format("{}: _solve_inner: stack size={}"));;
 
         //  9 x 9 個のマスがすべて埋まったら解を記録する。
         if state.@digit_count >= 9 * 9 {
@@ -493,12 +493,12 @@ namespace Generator {
             throw $ res.as_err
         };
         let (solutions, solve_step) = res.as_ok;
-        gen._progress(|_| [solutions.get_size, solve_step, state.@digit_count]
+        gen._progress(|_| [solutions.@size, solve_step, state.@digit_count]
                     .format("検証結果: 解の数={} ステップ数={} 数字の数={}"));;
-        if solutions.get_size == 0 {
+        if solutions.@size == 0 {
             throw $ "解なし"
         };
-        if solutions.get_size > 1 {
+        if solutions.@size > 1 {
             throw $ "複数解あり"
         };
         pure $ ()
@@ -527,8 +527,8 @@ namespace Generator {
     // var_random を用いて配列の要素をランダムに選択する。
     _select_random: Array a -> Generator -> IOFail a;
     _select_random = |array, gen| (
-        assert_lazy(|_| "array is empty", array.get_size >= 1) $ |_|
-        let i = *gen._with_random(generate_I64_range(0, array.get_size));
+        assert_lazy(|_| "array is empty", array.@size >= 1) $ |_|
+        let i = *gen._with_random(generate_I64_range(0, array.@size));
         pure $ array.@(i)
     );
 
@@ -553,7 +553,7 @@ namespace Generator {
             let new_state = BoardState::init_with_board(new_board);
             // 新しい盤面が唯一解を持つか確認する
             let res = *gen.@solver.solve(new_state).to_result.lift;
-            let res = res.map(|(solutions, solve_step)| solutions.get_size == 1);
+            let res = res.map(|(solutions, solve_step)| solutions.@size == 1);
             if res.is_err || res.as_ok == false {
                 // 穴を開けたら唯一解を持たなくなった
                 let retry = retry + 1;
@@ -607,7 +607,7 @@ namespace Generator {
                 board, |row, board|
                 Iterator::range(0, 9).fold(
                     board, |col, board|
-                    let digit = some $ ((start.@(row) + col) % 9 + 1).to_U8;
+                    let digit = some $ ((start.@(row) + col) % 9 + 1).u8;
                     board.set_digit(row, col, digit)
                 )
             )
@@ -622,7 +622,7 @@ namespace Generator {
                 Iterator::range(0, 9).fold(
                     board, |col, board|
                     let digit = board.get_digit(row, col);
-                    let digit = digit.map(|i| (subst.@(i.to_I64 - 1) + 1).to_U8);
+                    let digit = digit.map(|i| (subst.@(i.i64 - 1) + 1).u8);
                     board.set_digit(row, col, digit)
                 )
             )
@@ -705,8 +705,8 @@ namespace BoardSvg {
         let lines = Iterator::range(0, 9 + 1).fold(
             lines, |i, lines|
             let lw = if i % 3 == 0 { line_width_L } else { line_width_S };
-            let hline = Svg::rect(0.0, i.to_F64 * cell_size, board_size, lw);
-            let vline = Svg::rect(i.to_F64 * cell_size, 0.0, lw, board_size);
+            let hline = Svg::rect(0.0, i.f64 * cell_size, board_size, lw);
+            let vline = Svg::rect(i.f64 * cell_size, 0.0, lw, board_size);
             lines.add(hline).add(vline)
         );
         let texts = Svg::group.fill("black")
@@ -718,8 +718,8 @@ namespace BoardSvg {
                 let digit = board.get_digit(row, col);
                 if digit.is_none { texts };
                 let text = Svg::text(digit.as_some.to_string)
-                        .xy(col.to_F64 * cell_size + cell_size / 2.0 + line_width_L / 2.0,
-                            row.to_F64 * cell_size + cell_size / 2.0 + line_width_L / 2.0 + font_siz * 0.3)
+                        .xy(col.f64 * cell_size + cell_size / 2.0 + line_width_L / 2.0,
+                            row.f64 * cell_size + cell_size / 2.0 + line_width_L / 2.0 + font_siz * 0.3)
                         .attr("text-anchor","middle")
                         //.attr("dominant-baseline", "middle")
                         ;
@@ -848,7 +848,7 @@ run_command_generate = |submatches| (
     let verbose = submatches.get_one("verbose").as_some;
     let seed: U64 = *if seed.is_none {
         let time = *Time::get_now.lift;
-        pure $ time.@sec.to_U64.bit_xor(time.@nanosec.to_U64.shift_left(32_U64))
+        pure $ time.@sec.u64.bit_xor(time.@nanosec.u64.shift_left(32_U64))
     } else {
         from_string(seed.as_some).from_result
     };
@@ -906,7 +906,7 @@ main: IO ();
 main = (
     do {
         let args = *IO::get_args.lift;
-        let args = if args.get_size <= 1 {
+        let args = if args.@size <= 1 {
             //["sudoku.out", "solve", "-v"]
             ["sudoku.out", "generate", "-v"]
         } else { args };

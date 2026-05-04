@@ -17,7 +17,7 @@ perf_decode = |count, text| (
         )
     );
     eval debug_eprintln("Total time: " + consumed_time.to_string);
-    eval debug_eprintln("Time per loop: " + (consumed_time / count.to_F64).to_string);
+    eval debug_eprintln("Time per loop: " + (consumed_time / count.f64).to_string);
     res
 );
 
