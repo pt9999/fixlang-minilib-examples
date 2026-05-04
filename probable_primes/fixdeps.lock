@@ -20,21 +20,21 @@ rev = "fd75a6634ec0c919f2d1703112d25da9a3c2346e"
 
 [[dependencies]]
 name = "hash"
-version = "1.1.1"
-path = ".fixlang/deps/hash_1.1.1"
+version = "1.1.2"
+path = ".fixlang/deps/hash_1.1.2"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-hash.git"
-rev = "145a20913eb9c280edd616d5b9977d33303343c1"
+rev = "dbf95379b6ee7b26ec4858116f24c0251467cb83"
 
 [[dependencies]]
 name = "hashmap"
-version = "2.0.0"
-path = ".fixlang/deps/hashmap_2.0.0"
+version = "2.0.1"
+path = ".fixlang/deps/hashmap_2.0.1"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-hashmap.git"
-rev = "26bcb6c7cb66cc39b4f2604e1c94aa7730e03a9e"
+rev = "103595c593e92849be0b23df5cfee254da274a3e"
 
 [[dependencies]]
 name = "math"
@@ -47,93 +47,93 @@ rev = "f02f1493b1ac5563edded5ef36c8f7f82e512584"
 
 [[dependencies]]
 name = "minilib-app"
-version = "0.7.3"
-path = ".fixlang/deps/minilib-app_0.7.3"
+version = "0.7.4"
+path = ".fixlang/deps/minilib-app_0.7.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "1d1768c013203d3b9916512be81529aa06420a86"
+rev = "296cfc7c7c741d11b3ccbe3d2ae9c0cd87c466db"
 
 [[dependencies]]
 name = "minilib-binary"
-version = "0.6.3"
-path = ".fixlang/deps/minilib-binary_0.6.3"
+version = "0.6.4"
+path = ".fixlang/deps/minilib-binary_0.6.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-binary.git"
-rev = "e396317bce3c7a1006de2386e8cb71fa3665503a"
+rev = "3f4db9b7d323246b16648459efddda05db9e426a"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.13.1"
-path = ".fixlang/deps/minilib-common_0.13.1"
+version = "0.13.2"
+path = ".fixlang/deps/minilib-common_0.13.2"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "87c043b05ab35881c81a53587cdbc72f0ae0e5cf"
+rev = "dd2ac9b5be81dca3ddac5384954534b26835293c"
 
 [[dependencies]]
 name = "minilib-io"
-version = "0.8.4"
-path = ".fixlang/deps/minilib-io_0.8.4"
+version = "0.8.5"
+path = ".fixlang/deps/minilib-io_0.8.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "dbcaf9dae93f1df864b6eab0283f950f85d9c3f4"
+rev = "01ebb6b73e298c7274f88f3bc786935de8958027"
 
 [[dependencies]]
 name = "minilib-math"
-version = "0.7.4"
-path = ".fixlang/deps/minilib-math_0.7.4"
+version = "0.7.5"
+path = ".fixlang/deps/minilib-math_0.7.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-math.git"
-rev = "e8d6548141b36335de8eb97716198d40a987a7c7"
+rev = "c1b2dc0c9ec8d8d0c34c65a8254203ff0bc85326"
 
 [[dependencies]]
 name = "minilib-monad"
-version = "0.11.4"
-path = ".fixlang/deps/minilib-monad_0.11.4"
+version = "0.11.5"
+path = ".fixlang/deps/minilib-monad_0.11.5"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-monad.git"
-rev = "2efb940bb8d7c7350305bac87b7f98611e97bfed"
+rev = "15d4f78afdfb16889a54b895a9545a2e24e01678"
 
 [[dependencies]]
 name = "minilib-random"
-version = "0.7.3"
-path = ".fixlang/deps/minilib-random_0.7.3"
+version = "0.7.4"
+path = ".fixlang/deps/minilib-random_0.7.4"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-random.git"
-rev = "4f53be4765f3d01f35b77a4e58fafe29bc5e485f"
+rev = "58bf7ba3bfb687cc55f1ed55328ee737e7c60a03"
 
 [[dependencies]]
 name = "minilib-thread"
-version = "0.7.2"
-path = ".fixlang/deps/minilib-thread_0.7.2"
+version = "0.7.3"
+path = ".fixlang/deps/minilib-thread_0.7.3"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-thread.git"
-rev = "b99a83f5b3527361832bf3b8e4c71c725db30408"
+rev = "3bf3dccc5d89d088a367684200c80e57308d6b38"
 
 [[dependencies]]
 name = "random"
-version = "1.1.1"
-path = ".fixlang/deps/random_1.1.1"
+version = "1.1.2"
+path = ".fixlang/deps/random_1.1.2"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-random.git"
-rev = "b4f83ee48564e714c0918513dd431f9135493dce"
+rev = "af8b2ea3f4fb783d86119d1a2504a12d8f2be2c1"
 
 [[dependencies]]
 name = "ring-buffer"
-version = "0.1.1"
-path = ".fixlang/deps/ring-buffer_0.1.1"
+version = "0.1.2"
+path = ".fixlang/deps/ring-buffer_0.1.2"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/ring-buffer.git"
-rev = "78e543ca1eb24737659c47fa1253f0f4e92994bf"
+rev = "fa520558c0ae040eff99896a743a0e2820748c5e"
 
 [[dependencies]]
 name = "time"
