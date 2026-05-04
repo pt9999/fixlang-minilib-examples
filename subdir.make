@@ -2,7 +2,7 @@
 
 .PHONY: all build clean update-deps
 
-BUILD_OPTS = $(if $(CIENV), --allow-preliminary-commands, )
+BUILD_OPTS = $(if $(CIENV), --allow-preliminary-commands, ) --deny-deprecated
 
 all: build
 
