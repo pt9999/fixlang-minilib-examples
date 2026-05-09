@@ -62,7 +62,7 @@ main = (
     do {
         set_unbuffered_mode(IO::stdout).lift;;
         let time = *Time::get_now.lift;
-        let time = time.to_F64.i64;
+        let time = time.f64.i64;
 
         let matches = *command.get_matches;
         let param = Param {
