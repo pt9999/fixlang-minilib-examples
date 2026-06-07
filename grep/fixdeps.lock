@@ -38,12 +38,12 @@ rev = "296cfc7c7c741d11b3ccbe3d2ae9c0cd87c466db"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.13.2"
-path = ".fixlang/deps/minilib-common_0.13.2"
+version = "0.13.3"
+path = ".fixlang/deps/minilib-common_0.13.3"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "dd2ac9b5be81dca3ddac5384954534b26835293c"
+rev = "3de246b7bb012d8794d451a0490a0ffd4f667e1d"
 
 [[dependencies]]
 name = "regexp"
@@ -56,9 +56,9 @@ rev = "1ce9d507f7f21981cbd0d4a5885f18c818a35c11"
 
 [[dependencies]]
 name = "time"
-version = "1.0.2"
-path = ".fixlang/deps/time_1.0.2"
+version = "1.1.0"
+path = ".fixlang/deps/time_1.1.0"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-time.git"
-rev = "7af8a5c115e7437f94dcb4353807c03d816856f6"
+rev = "e9548828dd4926db00b1b0c3d387eaff60a5451d"
