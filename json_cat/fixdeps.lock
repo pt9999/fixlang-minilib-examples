@@ -29,54 +29,54 @@ rev = "103595c593e92849be0b23df5cfee254da274a3e"
 
 [[dependencies]]
 name = "minilib-app"
-version = "0.7.4"
-path = ".fixlang/deps/minilib-app_0.7.4"
+version = "0.8.0"
+path = ".fixlang/deps/minilib-app_0.8.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-app.git"
-rev = "296cfc7c7c741d11b3ccbe3d2ae9c0cd87c466db"
+rev = "a67b9b7667e7c177755266da65adef856f29cc72"
 
 [[dependencies]]
 name = "minilib-collection"
-version = "0.8.2"
-path = ".fixlang/deps/minilib-collection_0.8.2"
+version = "0.9.0"
+path = ".fixlang/deps/minilib-collection_0.9.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-collection.git"
-rev = "4f4b36e9a2067779cb8be50675ac7aab1807714c"
+rev = "b9bb9c9b64551cc4e8da5a4cc619099d86db8e44"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.13.3"
-path = ".fixlang/deps/minilib-common_0.13.3"
+version = "0.14.0"
+path = ".fixlang/deps/minilib-common_0.14.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "3de246b7bb012d8794d451a0490a0ffd4f667e1d"
+rev = "f29b872b8eca13fc5f30abfac94b4ef3a9a590d7"
 
 [[dependencies]]
 name = "minilib-json"
-version = "0.6.5"
-path = ".fixlang/deps/minilib-json_0.6.5"
+version = "0.7.0"
+path = ".fixlang/deps/minilib-json_0.7.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-json.git"
-rev = "8dd5ff391493543fb69198fc4316e418197248d1"
+rev = "0ee37506a91b1eb423c3ebbd7fdf1ca33b8f982d"
 
 [[dependencies]]
 name = "minilib-text"
-version = "0.9.4"
-path = ".fixlang/deps/minilib-text_0.9.4"
+version = "0.10.0"
+path = ".fixlang/deps/minilib-text_0.10.0"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-text.git"
-rev = "3005ff49fd58ab3496a5f340d1ba8908154dd62a"
+rev = "7d1493b006867b55ea5372b77281fe978f0a93db"
 
 [[dependencies]]
 name = "time"
-version = "1.1.0"
-path = ".fixlang/deps/time_1.1.0"
+version = "2.0.0"
+path = ".fixlang/deps/time_2.0.0"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-time.git"
-rev = "e9548828dd4926db00b1b0c3d387eaff60a5451d"
+rev = "bcf93dd61eb167e3ffe64ca9ca83ac2aea06587e"
