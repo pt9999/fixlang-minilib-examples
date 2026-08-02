@@ -2,12 +2,12 @@ proj_file_hash = "b1657545ade0bdc7045f31673ad50ff0"
 
 [[dependencies]]
 name = "asynctask"
-version = "2.0.0"
-path = ".fixlang/deps/asynctask_2.0.0"
+version = "2.0.1"
+path = ".fixlang/deps/asynctask_2.0.1"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-asynctask.git"
-rev = "9f3f6fb70c5c41719ac37251ef5b68d6b94854d7"
+rev = "2f3a8ab7254ffeb50372e588ac6f188cd14aaf4b"
 
 [[dependencies]]
 name = "character"

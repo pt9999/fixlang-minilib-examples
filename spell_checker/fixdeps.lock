@@ -65,12 +65,12 @@ rev = "f29b872b8eca13fc5f30abfac94b4ef3a9a590d7"
 
 [[dependencies]]
 name = "minilib-io"
-version = "0.9.0"
-path = ".fixlang/deps/minilib-io_0.9.0"
+version = "0.9.1"
+path = ".fixlang/deps/minilib-io_0.9.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "9a65dbf7b2f24caef8ba6f4ea4ba5f42caf77bfe"
+rev = "f9e1fceb66fc41fd97342ef4a843d194cdff28ff"
 
 [[dependencies]]
 name = "time"

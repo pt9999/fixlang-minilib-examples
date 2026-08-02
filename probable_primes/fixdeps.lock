@@ -2,12 +2,12 @@ proj_file_hash = "d7deacf4411ec803ad992b9c0c0157f0"
 
 [[dependencies]]
 name = "asynctask"
-version = "2.0.0"
-path = ".fixlang/deps/asynctask_2.0.0"
+version = "2.0.1"
+path = ".fixlang/deps/asynctask_2.0.1"
 
 [dependencies.git]
 repo = "https://github.com/tttmmmyyyy/fixlang-asynctask.git"
-rev = "9f3f6fb70c5c41719ac37251ef5b68d6b94854d7"
+rev = "2f3a8ab7254ffeb50372e588ac6f188cd14aaf4b"
 
 [[dependencies]]
 name = "character"
@@ -74,12 +74,12 @@ rev = "f29b872b8eca13fc5f30abfac94b4ef3a9a590d7"
 
 [[dependencies]]
 name = "minilib-io"
-version = "0.9.0"
-path = ".fixlang/deps/minilib-io_0.9.0"
+version = "0.9.1"
+path = ".fixlang/deps/minilib-io_0.9.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-io.git"
-rev = "9a65dbf7b2f24caef8ba6f4ea4ba5f42caf77bfe"
+rev = "f9e1fceb66fc41fd97342ef4a843d194cdff28ff"
 
 [[dependencies]]
 name = "minilib-math"
@@ -110,12 +110,12 @@ rev = "c4ebebf80c5e26c0de1d335831879de42703f8a1"
 
 [[dependencies]]
 name = "minilib-thread"
-version = "0.8.0"
-path = ".fixlang/deps/minilib-thread_0.8.0"
+version = "0.8.1"
+path = ".fixlang/deps/minilib-thread_0.8.1"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-thread.git"
-rev = "3684690ffcf456bf47440533dd7b48fa64a6cce5"
+rev = "89136813ef6c9d0c00dfeead7cc9948c5ee530a7"
 
 [[dependencies]]
 name = "random"
