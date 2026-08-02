@@ -7,6 +7,7 @@ license = "MIT"
 
 [build]
 output = "fractal_server.out"
+threaded = true
 opt_level = "basic"
 files = [
     "fractal_server.fix",

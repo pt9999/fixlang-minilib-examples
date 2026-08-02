@@ -7,6 +7,7 @@ license = "MIT"
 
 [build]
 output = "sudoku.out"
+threaded = true
 opt_level = "basic"
 files = [
     "sudoku.fix",
