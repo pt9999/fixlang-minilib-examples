@@ -13,6 +13,36 @@ files = [
 ]
 
 [[dependencies]]
+name = "character"
+version = "*"
+git = { url = "https://github.com/tttmmmyyyy/fixlang-character.git" }
+
+[[dependencies]]
+name = "hash"
+version = "*"
+git = { url = "https://github.com/tttmmmyyyy/fixlang-hash.git" }
+
+[[dependencies]]
+name = "hashmap"
+version = "*"
+git = { url = "https://github.com/tttmmmyyyy/fixlang-hashmap.git" }
+
+[[dependencies]]
+name = "hashset"
+version = "*"
+git = { url = "https://github.com/tttmmmyyyy/fixlang-hashset.git" }
+
+[[dependencies]]
+name = "minilib-common"
+version = "*"
+git = { url = "https://github.com/pt9999/fixlang-minilib-common.git" }
+
+[[dependencies]]
+name = "minilib-binary"
+version = "*"
+git = { url = "https://github.com/pt9999/fixlang-minilib-binary.git" }
+
+[[dependencies]]
 name = "minilib-app"
 version = "*"
 # path = "../../fixlang-minilib-app"
@@ -24,7 +54,3 @@ version = "*"
 # path = "../../fixlang-minilib-io"
 git = { url = "https://github.com/pt9999/fixlang-minilib-io.git" }
 
-[[dependencies]]
-name = "hashset"
-version = "*"
-git = { url = "https://github.com/tttmmmyyyy/fixlang-hashset.git" }

@@ -14,6 +14,21 @@ files = [
 ]
 
 [[dependencies]]
+name = "asynctask"
+version = "*"
+git = { url = "https://github.com/tttmmmyyyy/fixlang-asynctask.git" }
+
+[[dependencies]]
+name = "minilib-common"
+version = "*"
+git = { url = "https://github.com/pt9999/fixlang-minilib-common.git" }
+
+[[dependencies]]
+name = "minilib-io"
+version = "*"
+git = { url = "https://github.com/pt9999/fixlang-minilib-io.git" }
+
+[[dependencies]]
 name = "minilib-app"
 version = "*"
 # path = "../../fixlang-minilib-app"

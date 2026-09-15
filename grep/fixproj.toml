@@ -13,12 +13,17 @@ files = [
 ]
 
 [[dependencies]]
+name = "regexp"
+version = "*"
+git = { url = "https://github.com/tttmmmyyyy/fixlang-regexp.git" }
+
+[[dependencies]]
+name = "minilib-common"
+version = "*"
+git = { url = "https://github.com/pt9999/fixlang-minilib-common.git" }
+
+[[dependencies]]
 name = "minilib-app"
 version = "*"
 # path = "../../fixlang-minilib-app"
 git = { url = "https://github.com/pt9999/fixlang-minilib-app.git" }
-
-[[dependencies]]
-name = "regexp"
-version = "*"
-git = { url = "https://github.com/tttmmmyyyy/fixlang-regexp.git" }

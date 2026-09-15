@@ -13,6 +13,16 @@ files = [
 ]
 
 [[dependencies]]
+name = "math"
+version = "*"
+git = { url = "https://github.com/tttmmmyyyy/fixlang-math.git" }
+
+[[dependencies]]
+name = "minilib-common"
+version = "*"
+git = { url = "https://github.com/pt9999/fixlang-minilib-common.git" }
+
+[[dependencies]]
 name = "minilib-app"
 version = "*"
 # path = "../../fixlang-minilib-app"
