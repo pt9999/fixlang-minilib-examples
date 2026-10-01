@@ -47,12 +47,12 @@ rev = "b358edcc26744eb5ea5a98878a99b2da2dc1e9e5"
 
 [[dependencies]]
 name = "minilib-common"
-version = "0.14.0"
-path = ".fixlang/deps/minilib-common_0.14.0"
+version = "0.14.2"
+path = ".fixlang/deps/minilib-common_0.14.2"
 
 [dependencies.git]
 repo = "https://github.com/pt9999/fixlang-minilib-common.git"
-rev = "f29b872b8eca13fc5f30abfac94b4ef3a9a590d7"
+rev = "8bf582caa717d2c5115c890547e06ef8ff77db04"
 
 [[dependencies]]
 name = "minilib-json"
