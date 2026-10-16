@@ -19,7 +19,7 @@ process_file = |regexp, input_fh, filename| (
         };
         let line = line.strip_last_newlines;
         let res = regexp.match_one(line);
-        if res.is_err {
+        if res.is_none {
             continue_m $ ()
         };
         println(prefix + line).lift;;
