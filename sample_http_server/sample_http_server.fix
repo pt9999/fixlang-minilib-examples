@@ -66,12 +66,12 @@ namespace ChatBoard {
         html
     );
 
-    _DEFAULT_NAME: String;
-    _DEFAULT_NAME = "Anonymous😀";
+    __DEFAULT_NAME: String;
+    __DEFAULT_NAME = "Anonymous😀";
 
     on_get: Var AppState -> Request -> Response -> IOFail Response;
     on_get = |app_state_var, req, res| (
-        let name = req.find_query("name").map_or(_DEFAULT_NAME, |name|name);
+        let name = req.find_query("name").map_or(__DEFAULT_NAME, |name|name);
         let chat_board = *app_state_var.get.map(@chat_board).lift;
         let html = chat_board.render(name);
         res.content_type("html").write_str(html)
@@ -79,7 +79,7 @@ namespace ChatBoard {
 
     on_post: Var AppState -> Request -> Response -> IOFail Response;
     on_post = |app_state_var, req, res| (
-        let name = req.find_query("name").map_or(_DEFAULT_NAME, |name|name);
+        let name = req.find_query("name").map_or(__DEFAULT_NAME, |name|name);
         let message = req.find_query("message").map_or("", |s| s);
         // eval debug_eprintln("name="+name+" message="+message);
         if name == "" && message == "" {
